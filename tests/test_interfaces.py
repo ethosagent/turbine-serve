@@ -26,6 +26,7 @@ from spark_engine.interfaces import (
     Tokenizer,
 )
 from spark_engine.kv_cache import PagedKVCache
+from spark_engine.sampler import TorchSampler
 from spark_engine.scheduler import FCFSScheduler
 from spark_engine.types import AttentionMetadata
 
@@ -40,6 +41,7 @@ CONFORMANCE.append(
         lambda: FCFSScheduler(PagedKVCache(1, 1, 1, 16, 0, "cpu", num_blocks=4), 8, (7,)),
     )
 )
+CONFORMANCE.append((TorchSampler, Sampler, TorchSampler))
 
 
 def test_concrete_classes_satisfy_protocols(
