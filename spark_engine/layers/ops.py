@@ -16,7 +16,8 @@ def rope_cos_sin(
     positions: torch.Tensor, head_dim: int, theta: float
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """fp32 cos and sin tables for flat positions; the frequencies are duplicated across halves."""
-    exponent = torch.arange(0, head_dim, 2, dtype=torch.int64).float() / head_dim  # [D/2]
+    arange = torch.arange(0, head_dim, 2, dtype=torch.int64, device=positions.device)  # [D/2]
+    exponent = arange.float() / head_dim  # [D/2]
     inv_freq = 1.0 / (theta**exponent)  # [D/2]
     freqs = positions.float()[:, None] * inv_freq[None, :]  # [T, D/2]
     emb = torch.cat((freqs, freqs), dim=-1)  # [T, D]

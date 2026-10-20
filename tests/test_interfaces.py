@@ -15,6 +15,7 @@ With no entries the test is skipped, not errored.
 from collections.abc import Callable
 
 import pytest
+import torch
 from spark_engine.attention.sdpa import SDPAAttention
 from spark_engine.detokenizer import IncrementalDetokenizer
 from spark_engine.interfaces import (
@@ -28,10 +29,13 @@ from spark_engine.interfaces import (
     Tokenizer,
 )
 from spark_engine.kv_cache import PagedKVCache
+from spark_engine.model_runner import GPUModelRunner
+from spark_engine.models.qwen3 import Qwen3Model
 from spark_engine.sampler import TorchSampler
 from spark_engine.scheduler import FCFSScheduler
 from spark_engine.tokenizer import HFTokenizer
 from spark_engine.types import AttentionMetadata
+from transformers import Qwen3Config
 
 from tests.fakes import FakeRunner
 
@@ -55,6 +59,38 @@ CONFORMANCE.append(
         IncrementalDetokenizer,
         Detokenizer,
         lambda: HFTokenizer("Qwen/Qwen3-4B", 8192).new_detokenizer(),
+    )
+)
+
+
+def _tiny_cfg() -> Qwen3Config:
+    return Qwen3Config(
+        num_hidden_layers=1,
+        hidden_size=8,
+        intermediate_size=16,
+        num_attention_heads=2,
+        num_key_value_heads=1,
+        head_dim=4,
+        vocab_size=16,
+        rope_parameters={"rope_type": "default", "rope_theta": 1e6},
+    )
+
+
+def _tiny_model() -> Qwen3Model:
+    return Qwen3Model(_tiny_cfg(), "cpu", torch.float32)
+
+
+CONFORMANCE.append((Qwen3Model, Model, _tiny_model))
+CONFORMANCE.append(
+    (
+        GPUModelRunner,
+        ModelRunner,
+        lambda: GPUModelRunner(
+            _tiny_model(),
+            PagedKVCache(1, 1, 4, 16, 0, "cpu", num_blocks=4),
+            SDPAAttention(2, 1, 4),
+            "cpu",
+        ),
     )
 )
 

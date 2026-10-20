@@ -5,8 +5,19 @@ import threading
 import time
 from collections.abc import Callable
 
+from transformers import AutoConfig
+
+from spark_engine.attention import get_attention_backend
+from spark_engine.config import EngineConfig
 from spark_engine.interfaces import ModelRunner, Sampler, Scheduler
+from spark_engine.kv_cache import PagedKVCache
+from spark_engine.loader import iter_weights, resolve_model_path
 from spark_engine.log import get_logger
+from spark_engine.model_runner import GPUModelRunner
+from spark_engine.models import get_model_cls
+from spark_engine.sampler import TorchSampler
+from spark_engine.scheduler import FCFSScheduler
+from spark_engine.tokenizer import HFTokenizer
 from spark_engine.types import (
     SamplingParams,
     SchedulerOutput,
@@ -181,3 +192,39 @@ class Engine:
             ttft_ms=None if first is None else _ms(seq.arrival_ts, first),
             tpot_ms=None if first is None else _ms(first, now) / max(1, completion - 1),
         )
+
+
+def build_engine(config: EngineConfig) -> tuple[Engine, HFTokenizer]:
+    """Composition root: resolve the checkpoint, build every block, wire the Engine."""
+    path = resolve_model_path(config.model)
+    cfg = AutoConfig.from_pretrained(path)
+    tokenizer = HFTokenizer(path, config.max_model_len)
+    kv = PagedKVCache(
+        num_layers=cfg.num_hidden_layers,
+        num_kv_heads=cfg.num_key_value_heads,
+        head_dim=cfg.head_dim,
+        block_size=config.block_size,
+        kv_gb=config.kv_gb,
+        device=config.device,
+        dtype=config.torch_dtype,
+    )
+    # Protocols carry no constructor; every backend takes (num_q_heads, num_kv_heads, head_dim).
+    attn = get_attention_backend(config.attention_backend)(
+        cfg.num_attention_heads, cfg.num_key_value_heads, cfg.head_dim
+    )  # type: ignore[call-arg]
+    model = get_model_cls(cfg.model_type)(cfg, config.device, config.torch_dtype)
+    model.load_weights(iter_weights(path, config.device, config.torch_dtype))
+    runner = GPUModelRunner(model, kv, attn, config.device)
+    scheduler = FCFSScheduler(kv, config.max_num_seqs, tokenizer.eos_token_ids)
+    engine = Engine(scheduler, runner, TorchSampler())
+    log.info(
+        "engine.built",
+        model=config.model,
+        model_type=cfg.model_type,
+        attention_backend=config.attention_backend,
+        num_blocks=kv.num_blocks,
+        max_num_seqs=config.max_num_seqs,
+        device=config.device,
+        dtype=config.dtype,
+    )
+    return engine, tokenizer
