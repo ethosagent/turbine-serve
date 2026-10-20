@@ -44,4 +44,6 @@ make sync           # push the tree to the DGX Spark
 scripts/spark.sh pytest -q   # run the suite (GPU tests included) in the NGC container
 ```
 
+`scripts/serve-tiny.sh` serves a random tiny Qwen3 on CPU for end-to-end runs on the Mac.
+
 Agent map: `CLAUDE.md`. Constitution: `ARCHITECTURE.md`. Tour: `docs/orientation.md`.

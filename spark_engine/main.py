@@ -4,9 +4,13 @@ import argparse
 from collections.abc import Sequence
 from typing import Any, Literal, get_args, get_origin
 
+import uvicorn
 from pydantic import BaseModel
 
+from spark_engine.api.server import create_app
 from spark_engine.config import EngineConfig, log_resolved
+from spark_engine.engine import build_engine
+from spark_engine.engine_client import EngineClient
 from spark_engine.log import configure_logging, get_logger
 
 log = get_logger("main")
@@ -55,7 +59,15 @@ def config_from_args(argv: Sequence[str] | None) -> EngineConfig:
 
 
 def serve(config: EngineConfig) -> None:
-    raise NotImplementedError("serve is wired in Task 15")
+    """Build engine + tokenizer, wrap the engine in its client, run the API under uvicorn.
+
+    The engine thread starts and stops in the app's lifespan; logging is already configured
+    by `config_from_args`, so uvicorn's own log config is disabled.
+    """
+    engine, tokenizer = build_engine(config)
+    client = EngineClient(engine, config.max_queue)
+    app = create_app(client, tokenizer, config.model, config.max_model_len)
+    uvicorn.run(app, host=config.host, port=config.port, log_config=None)
 
 
 def cli(argv: Sequence[str] | None = None) -> None:
