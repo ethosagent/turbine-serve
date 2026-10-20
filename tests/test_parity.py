@@ -58,7 +58,9 @@ def ref_ids(
             pad_token_id=model_engine[1].hf.eos_token_id,
         )  # [1, P + N]
     ids: list[int] = out[0, len(prompt) :].tolist()
-    assert len(ids) == model_case.parity_tokens
+    # Qwen3-4B answers this prompt in 63 tokens and stops on <|im_end|>; the engine must too.
+    eos = model_engine[1].eos_token_ids
+    assert len(ids) == model_case.parity_tokens or ids[-1] in eos
     return ids
 
 
@@ -117,7 +119,7 @@ def test_greedy_tokens_match_hf(
                 f"our logits {a}={our_row[a]:.4f} {b}={our_row[b]:.4f}"
             )
     else:
-        print(f"[{model_case.name}] greedy {n} tokens match transformers")
+        print(f"[{model_case.name}] greedy {len(ours)}/{n} tokens match transformers")
     assert ours == ref_ids
 
 
