@@ -136,6 +136,11 @@ def _error(status: int, message: str, error_type: str, start: float) -> JSONResp
     return JSONResponse(status_code=status, content=content)
 
 
+def _engine_error(start: float) -> JSONResponse:
+    """The engine failed the sequence before any byte was sent: a plain 500."""
+    return _error(500, "engine error", "server_error", start)
+
+
 def _sampling_params(
     req: ChatCompletionRequest, prompt_len: int, max_model_len: int
 ) -> SamplingParams:
@@ -178,6 +183,8 @@ async def _complete(
 ) -> JSONResponse:
     async with aclosing(outs):
         all_outs = [first] + [out async for out in outs]
+    if all_outs[-1].finish_reason == "error":
+        return _engine_error(ctx.start)
     content = "".join(ctx.text(out) for out in all_outs)
     completion_tokens = sum(1 for out in all_outs if out.finish_reason != "error")
     body = ChatCompletionResponse(
@@ -229,7 +236,8 @@ def create_app(
     async def handle(req: ChatCompletionRequest, request_id: str, start: float) -> Response:
         messages = [m.model_dump() for m in req.messages]
         try:
-            prompt_ids = tokenizer.encode_chat(messages, **req.chat_template_kwargs)
+            enable_thinking = bool(req.chat_template_kwargs.get("enable_thinking", False))
+            prompt_ids = tokenizer.encode_chat(messages, enable_thinking=enable_thinking)
             params = _sampling_params(req, len(prompt_ids), max_model_len)
             outs = client.generate(prompt_ids, params, request_id)
             first = await anext(outs)  # QueueFull / impossible-KV ValueError surface here
@@ -237,6 +245,9 @@ def create_app(
             return _error(503, str(exc), "server_overloaded", start)
         except ValueError as exc:  # includes PromptTooLong
             return _error(400, str(exc), "invalid_request_error", start)
+        if first.finish_reason == "error":  # nothing sent yet, so the status can still say so
+            await outs.aclose()
+            return _engine_error(start)
         ctx = _Request(request_id, model_id, len(prompt_ids), tokenizer.new_detokenizer(), start)
         if req.stream:
             return StreamingResponse(_stream(outs, first, ctx), media_type="text/event-stream")

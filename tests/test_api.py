@@ -18,7 +18,7 @@ from spark_engine.log import configure_logging
 from spark_engine.tokenizer import PromptTooLong
 from spark_engine.types import SamplingParams
 
-from tests.fakes import make_engine
+from tests.fakes import FakeRunner, make_engine
 
 MAX_LEN = 64
 GREEDY = {"temperature": 0}
@@ -36,8 +36,10 @@ class FakeTokenizer:
 
     def __init__(self, max_model_len: int) -> None:
         self.max_model_len = max_model_len
+        self.template_kwargs: list[dict[str, Any]] = []  # one entry per encode_chat call
 
     def encode_chat(self, messages: list[dict[str, Any]], **template_kwargs: Any) -> list[int]:
+        self.template_kwargs.append(template_kwargs)
         content = str(messages[-1]["content"])
         if not content.startswith("long:"):
             return [1, 2]
@@ -197,6 +199,35 @@ async def test_request_id_in_logs(api: httpx.AsyncClient, tmp_path: Path) -> Non
     assert completed["duration_ms"] >= 0
     submitted = next(line for line in lines if line["event"] == "seq.submitted")
     assert submitted["request_id"] == request_id
+
+
+async def test_chat_template_kwargs_are_not_splatted() -> None:
+    tokenizer = FakeTokenizer(MAX_LEN)
+    async with serve(tokenizer=tokenizer) as http:
+        bad = chat(max_tokens=2, chat_template_kwargs={"messages": 1})
+        resp = await http.post("/v1/chat/completions", json=bad)
+        assert resp.status_code == 200
+        thinking = chat(max_tokens=2, chat_template_kwargs={"enable_thinking": True})
+        resp = await http.post("/v1/chat/completions", json=thinking)
+        assert resp.status_code == 200
+    assert tokenizer.template_kwargs == [{"enable_thinking": False}, {"enable_thinking": True}]
+
+
+@pytest.mark.parametrize("stream", [False, True])
+async def test_engine_error_before_output_is_500(stream: bool, tmp_path: Path) -> None:
+    log_file = tmp_path / "api.jsonl"
+    engine = make_engine(runner=FakeRunner(fail_on_step=1))[0]
+    configure_logging("info", str(log_file))
+    try:
+        async with serve(engine=engine) as http:
+            resp = await http.post("/v1/chat/completions", json=chat(stream=stream, **GREEDY))
+    finally:
+        configure_logging("info", None)
+    assert resp.status_code == 500
+    assert resp.json() == {"error": {"message": "engine error", "type": "server_error"}}
+    lines = [json.loads(line) for line in log_file.read_text().splitlines()]
+    completed = [line for line in lines if line["event"] == "request.completed"]
+    assert len(completed) == 1 and completed[0]["status"] == 500
 
 
 async def test_stream_disconnect_logs_499(tmp_path: Path) -> None:

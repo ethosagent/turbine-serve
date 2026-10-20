@@ -115,7 +115,9 @@ Libraries: fastapi, uvicorn, pydantic
 - Defines OpenAI request/response schemas with pydantic and validates input.
 - Generates `request_id`, binds it to the logging context.
 - Calls the tokenizer, submits to the engine client, streams SSE chunks or returns one JSON body.
-- Maps engine errors to HTTP status codes (400 prompt too long, 503 queue full).
+- Maps engine errors to HTTP status codes (400 prompt too long, 503 queue full, 500 engine
+  error before any output; a mid-stream failure ends the stream with `finish_reason: "error"`).
+- Passes only `enable_thinking` from `chat_template_kwargs` to the tokenizer; other keys are ignored.
 
 Interface:
 ```
