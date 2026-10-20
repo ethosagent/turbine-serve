@@ -1,4 +1,7 @@
-"""Parity with transformers (tiny cpu fp32; real Qwen3-4B cuda bf16): logits and greedy tokens."""
+"""Parity with transformers, the M2 gate (ADR 0004): tiny cpu fp32 and real Qwen3-4B cuda fp32.
+
+bf16 is not gated here; tests/test_bf16_report.py reports it.
+"""
 
 import re
 from collections.abc import Iterator
@@ -14,22 +17,32 @@ from spark_engine.tokenizer import HFTokenizer
 from spark_engine.types import SamplingParams
 from transformers import AutoConfig, Qwen3ForCausalLM
 
-from tests.model_cases import ModelCase, engine_logits, free_gpu_memory, top2
+from tests.model_cases import (
+    PARITY_MESSAGES,
+    ModelCase,
+    engine_logits,
+    free_gpu_memory,
+    hf_greedy,
+    hf_logits,
+    load_hf,
+    top2,
+)
 
-MESSAGES = [{"role": "user", "content": "Explain the paged KV cache in two sentences."}]
-TOL = 1e-4  # tiny fp32 logits; the real bf16 case compares argmax instead (not assert_close-stable)
+TOL = 1e-4  # tiny cpu fp32: same kernels as HF, so logits agree to fp32 noise
+# Real cuda fp32: measured max abs logit diff 2.7e-2 over 87 positions (logits ~30, so ~1e-3
+# relative; cuda GEMM/SDPA reduction order differs from HF's). 0.1 is ~4x headroom and still far
+# below the 0.8 a bf16 run shows. The gate is exact argmax at every position plus this bound.
+REAL_ATOL = 0.1
 
 
 @pytest.fixture(scope="module")
 def hf_model(model_case: ModelCase) -> Iterator[Qwen3ForCausalLM]:
     """The transformers reference in the case's dtype; only one real copy is ever alive."""
     if model_case.name == "tiny":
-        yield Qwen3ForCausalLM.from_pretrained(model_case.model_dir, dtype=torch.float32).eval()
+        yield load_hf(model_case)
         return
     free_gpu_memory()
-    # .to("cuda") rather than device_map="cuda": device_map needs `accelerate`, not a dependency.
-    model = Qwen3ForCausalLM.from_pretrained(model_case.model_dir, dtype=torch.bfloat16)
-    model = model.to("cuda").eval()
+    model = load_hf(model_case)
     yield model
     del model
     free_gpu_memory()
@@ -37,7 +50,7 @@ def hf_model(model_case: ModelCase) -> Iterator[Qwen3ForCausalLM]:
 
 @pytest.fixture(scope="module")
 def prompt(model_engine: tuple[Engine, HFTokenizer]) -> list[int]:
-    return model_engine[1].encode_chat(MESSAGES)
+    return model_engine[1].encode_chat(PARITY_MESSAGES)
 
 
 @pytest.fixture(scope="module")
@@ -48,25 +61,12 @@ def ref_ids(
     prompt: list[int],
 ) -> list[int]:
     """HF greedy continuation of the prompt, `parity_tokens` tokens."""
-    input_ids = torch.tensor([prompt], device=model_case.device)  # [1, P]
-    with torch.inference_mode():
-        out = hf_model.generate(
-            input_ids,
-            attention_mask=torch.ones_like(input_ids),
-            max_new_tokens=model_case.parity_tokens,
-            do_sample=False,
-            pad_token_id=model_engine[1].hf.eos_token_id,
-        )  # [1, P + N]
-    ids: list[int] = out[0, len(prompt) :].tolist()
+    tokenizer = model_engine[1]
+    n = model_case.parity_tokens
+    ids = hf_greedy(hf_model, prompt, n, model_case.device, tokenizer.hf.eos_token_id)
     # Qwen3-4B answers this prompt in 63 tokens and stops on <|im_end|>; the engine must too.
-    eos = model_engine[1].eos_token_ids
-    assert len(ids) == model_case.parity_tokens or ids[-1] in eos
+    assert len(ids) == n or ids[-1] in tokenizer.eos_token_ids
     return ids
-
-
-def _hf_logits(hf_model: Qwen3ForCausalLM, ids: list[int], device: str) -> torch.Tensor:
-    with torch.inference_mode():
-        return hf_model(torch.tensor([ids], device=device)).logits[0].float()  # [T, V]
 
 
 def test_teacher_forced_logits_match_hf(
@@ -79,20 +79,24 @@ def test_teacher_forced_logits_match_hf(
     ids = prompt + ref_ids
     ours = engine_logits(model_engine[0], ids)  # [T, V]
     assert ours.dtype == torch.float32
-    ref = _hf_logits(hf_model, ids, model_case.device)  # [T, V]
+    ref = hf_logits(hf_model, ids, model_case.device)  # [T, V]
     diff = (ours - ref).abs().amax(dim=-1)  # [T]
     print(f"[{model_case.name}] max abs logit diff {diff.max():.3e} over {len(ids)} positions")
-    if model_case.name == "tiny":
-        bad = torch.nonzero(diff > TOL)
-        if bad.numel():
-            pos = int(bad[0])
-            print(f"first bad position {pos} (prompt len {len(prompt)}): diff {diff[pos]:.3e}")
-        torch.testing.assert_close(ours, ref, atol=TOL, rtol=TOL)
-        return
+    tol = TOL if model_case.name == "tiny" else REAL_ATOL
+    bad = torch.nonzero(diff > tol)
+    if bad.numel():
+        pos = int(bad[0])
+        print(f"first bad position {pos} (prompt len {len(prompt)}): diff {diff[pos]:.3e}")
     agree = ours.argmax(dim=-1) == ref.argmax(dim=-1)  # [T]
-    print(f"[real] argmax agreement {int(agree.sum())}/{len(ids)} (prompt len {len(prompt)})")
+    print(f"[{model_case.name}] argmax agreement {int(agree.sum())}/{len(ids)}")
     for pos in torch.nonzero(~agree).flatten().tolist():
-        print(f"[real] argmax mismatch at {pos}: ours {top2(ours[pos])} | hf {top2(ref[pos])}")
+        print(
+            f"[{model_case.name}] argmax mismatch at {pos}: ours {top2(ours[pos])} | hf {top2(ref[pos])}"
+        )
+    if model_case.name == "tiny":
+        torch.testing.assert_close(ours, ref, atol=TOL, rtol=TOL)
+    else:
+        torch.testing.assert_close(ours, ref, atol=REAL_ATOL, rtol=0)
     assert bool(agree.all()), "teacher-forced argmax differs from transformers"
 
 
@@ -110,7 +114,7 @@ def test_greedy_tokens_match_hf(
         k = next((i for i, (a, b) in enumerate(zip(ours, ref_ids, strict=False)) if a != b), n)
         ctx = prompt + ref_ids[:k]
         if k < min(len(ours), len(ref_ids)):
-            hf_row = _hf_logits(hf_model, ctx, model_case.device)[-1]  # [V]
+            hf_row = hf_logits(hf_model, ctx, model_case.device)[-1]  # [V]
             our_row = engine_logits(engine, ctx)[-1]  # [V]
             a, b = ours[k], ref_ids[k]
             print(

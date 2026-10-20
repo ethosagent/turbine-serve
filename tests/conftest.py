@@ -1,8 +1,10 @@
 """Shared pytest setup: hardware/server skips and the tiny/real model cases.
 
 `model_case` is parametrized over "tiny" (2-layer random Qwen3, cpu fp32, runs everywhere) and
-"real" (Qwen/Qwen3-4B, cuda bf16; needs TURBINE_REAL_MODEL=1 and a CUDA device, so it skips on
-the Mac). Engine fixtures are module-scoped; the real ones free GPU memory before they build.
+"real" (Qwen/Qwen3-4B, cuda fp32; needs TURBINE_REAL_MODEL=1 and a CUDA device, so it skips on
+the Mac). The real case is fp32 because M2 is gated on fp32-on-cuda parity (ADR 0004); bf16 is
+reported by tests/test_bf16_report.py. Engine fixtures are module-scoped; the real ones free GPU
+memory before they build.
 
 torch and spark_engine are imported inside the hooks/fixtures that need them, so the e2e tests
 load with only pytest + openai installed (the Spark host venv has no torch).
@@ -81,14 +83,15 @@ def model_case(request: pytest.FixtureRequest) -> ModelCase:
         tiny_dir = request.getfixturevalue("tiny_model_dir")
         return ModelCase("tiny", str(tiny_dir), "cpu", "float32", 0.01, 16)
     real_dir = request.getfixturevalue("real_model_dir")
-    return ModelCase("real", real_dir, "cuda", "bfloat16", 4, 64)
+    # fp32: the gated parity case (ADR 0004). ~16 GB weights + kv 4 GB; HF fp32 adds ~16 GB.
+    return ModelCase("real", real_dir, "cuda", "float32", 4, 64)
 
 
 @pytest.fixture(scope="module")
 def model_engine(
     model_case: ModelCase, request: pytest.FixtureRequest
 ) -> Iterator[tuple[Engine, HFTokenizer]]:
-    """The engine for the current case: the shared tiny engine, or a fresh real bf16 engine."""
+    """The engine for the current case: the shared tiny engine, or a fresh real fp32 engine."""
     from spark_engine.engine import build_engine
 
     from tests.model_cases import free_gpu_memory

@@ -47,3 +47,5 @@ jq -c 'select(.event=="seq.completed") | {seq_id,finish_reason,ttft_ms,tpot_ms}'
 - 2026-10-20: `apply_chat_template(tokenize=True)` changed return type across transformers majors;
   use `tokenize=False` then `encode(add_special_tokens=False)`.
 - 2026-10-20: ruff formats fenced Python in `.md` files; keep `extend-exclude` for docs/ and plan/.
+- 2026-10-20: bf16 is never bit-identical to HF (HF rounds RoPE/SwiGLU to bf16 earlier); M2 is gated on
+  fp32-on-cuda parity (ADR 0004). A bf16-only mismatch on a near-tie is expected; read `logs/bf16_parity.json`.

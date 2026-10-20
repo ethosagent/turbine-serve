@@ -1,4 +1,4 @@
-"""Engine on a real checkpoint (tiny cpu fp32; Qwen3-4B cuda bf16): batching, KV, sampling, logs."""
+"""Engine on a real checkpoint (tiny cpu fp32; Qwen3-4B cuda fp32): batching, KV, sampling, logs."""
 
 import json
 from pathlib import Path

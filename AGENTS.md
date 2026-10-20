@@ -43,7 +43,9 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 3. **Flat `[T]` tensors; never pad to `[batch, len]`.** Paged KV from day one.
 4. **Log component == file name.** `get_logger("scheduler")` lives only in `scheduler.py`
    (gate: `check-components`). One JSON line per event; lifecycle at info, per-step at debug.
-5. **Parity is the gate.** M2 passes only when greedy 64 tokens match `transformers`.
+5. **fp32-on-cuda parity is the gate.** M2 passes only when Qwen3-4B in fp32 on cuda matches
+   `transformers` fp32: argmax at every position, greedy 64 tokens. bf16 is reported, not
+   gated (ADR 0004).
 6. **Twin docs.** `CLAUDE.md` == `AGENTS.md`, same commit (gate: `check-twins`).
 7. **Done ships docs.** Tests for the change, skills/docs updated, `make check` green, one commit.
    Workflow: `.claude/skills/milestone-workflow/SKILL.md`.
@@ -65,8 +67,8 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
   (loader, model, attention, runner, parity): the tiny checkpoint from
   `spark_engine/testing/tiny_model.py` on CPU in fp32, with `transformers` as the reference.
   `scripts/serve-tiny.sh` serves it so the API runs end to end on the Mac.
-- The Spark runs the SAME tests with `TURBINE_REAL_MODEL=1` (real weights, cuda, bf16). A failure
-  seen on the Spark is reproduced on the Mac first if it is structural, then fixed here.
+- The Spark runs the SAME tests with `TURBINE_REAL_MODEL=1` (real weights, cuda; fp32 gated,
+  bf16 reported). A failure seen on the Spark is reproduced on the Mac first if it is structural, then fixed here.
 - Bug fix ⇒ a test that reproduces it first. A `types.py` change needs a test in every consumer.
 - `tests/test_interfaces.py` checks every concrete class against its Protocol; add each new pair.
 

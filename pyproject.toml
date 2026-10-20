@@ -59,6 +59,7 @@ addopts = "-q -p no:cacheprovider"
 markers = [
   "gpu: needs a CUDA device (skipped on the Mac)",
   "e2e: needs a running server at TURBINE_BASE_URL",
+  "report: non-gating metric (bf16 vs HF); asserts structural sanity only, never a near-tie",
 ]
 
 # ---------------------------------------------------------------- ruff
