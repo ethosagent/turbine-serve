@@ -15,6 +15,11 @@ from openai.types.chat import ChatCompletionMessageParam
 pytestmark = pytest.mark.e2e
 
 MESSAGES: list[ChatCompletionMessageParam] = [{"role": "user", "content": "Say hello in one word."}]
+# long enough that a real model cannot finish inside a 5-token budget
+LONG_MESSAGES: list[ChatCompletionMessageParam] = [
+    {"role": "user", "content": "Count from 1 to 100, separated by commas."}
+]
+REAL_MODEL = "Qwen/Qwen3-4B"
 
 
 @pytest.fixture(scope="module")
@@ -46,7 +51,7 @@ def test_stream_reply(client: OpenAI, model_id: str) -> None:
 
 def test_non_stream_usage_and_length(client: OpenAI, model_id: str) -> None:
     resp = client.chat.completions.create(
-        model=model_id, messages=MESSAGES, max_tokens=5, temperature=0
+        model=model_id, messages=LONG_MESSAGES, max_tokens=5, temperature=0
     )
     assert resp.choices[0].finish_reason == "length"
     assert resp.usage is not None
@@ -55,15 +60,20 @@ def test_non_stream_usage_and_length(client: OpenAI, model_id: str) -> None:
 
 
 def test_thinking_inline(client: OpenAI, model_id: str) -> None:
-    # 200 only on the tiny model; Plan B also asserts "</think>" in content on the real model
+    # tiny (random weights): shape only; real Qwen3-4B: the thinking block closes inline in content
+    real = model_id == REAL_MODEL
     raw = client.chat.completions.with_raw_response.create(
         model=model_id,
         messages=MESSAGES,
-        max_tokens=8,
+        max_tokens=1024 if real else 8,
+        temperature=0,
         extra_body={"chat_template_kwargs": {"enable_thinking": True}},
     )
     assert raw.status_code == 200
-    assert raw.parse().choices[0].finish_reason in {"stop", "length"}
+    choice = raw.parse().choices[0]
+    assert choice.finish_reason in {"stop", "length"}
+    if real:
+        assert "</think>" in (choice.message.content or "")
 
 
 def test_prompt_too_long_400(client: OpenAI, model_id: str) -> None:
