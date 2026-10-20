@@ -25,6 +25,9 @@ pip install turbine-serve
 turbine serve Qwen/Qwen3-4B --kv-gb 30
 ```
 
+The pip path needs a torch build with sm_121 (GB10) support on the host; stock PyPI torch lacks
+it, so on the Spark serve from the container.
+
 Then any OpenAI client works:
 
 ```bash
