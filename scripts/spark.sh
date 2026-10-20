@@ -9,7 +9,7 @@ IMAGE=turbine-serve-dev
 BASE='docker run --rm --gpus all --ipc=host -v ~/spark-engine:/w -w /w -v ~/.cache/huggingface:/root/.cache/huggingface -e PYTHONPATH=/w'
 case "${1:-}" in
   --build) ssh dgx-spark "cd ~/spark-engine && docker build --target deps -t $IMAGE ." ;;
-  --serve) shift; ssh -t dgx-spark "$BASE -p 127.0.0.1:8000:8000 $IMAGE python -m spark_engine.main serve $* --host 0.0.0.0" ;;
+  --serve) shift; ssh -t dgx-spark "$BASE -p 127.0.0.1:8000:8000 $IMAGE python -m spark_engine.main serve $(printf '%q ' "$@")--host 0.0.0.0" ;;
   "") echo "usage: scripts/spark.sh [--build | --serve <model> [flags] | <cmd...>]"; exit 2 ;;
   *) ssh dgx-spark "$BASE $IMAGE $(printf '%q ' "$@")" ;;
 esac
