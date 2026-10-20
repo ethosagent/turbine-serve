@@ -15,6 +15,7 @@ With no entries the test is skipped, not errored.
 from collections.abc import Callable
 
 import pytest
+from spark_engine.detokenizer import IncrementalDetokenizer
 from spark_engine.interfaces import (
     AttentionBackend,
     Detokenizer,
@@ -28,6 +29,7 @@ from spark_engine.interfaces import (
 from spark_engine.kv_cache import PagedKVCache
 from spark_engine.sampler import TorchSampler
 from spark_engine.scheduler import FCFSScheduler
+from spark_engine.tokenizer import HFTokenizer
 from spark_engine.types import AttentionMetadata
 
 from tests.fakes import FakeRunner
@@ -45,6 +47,14 @@ CONFORMANCE.append(
 )
 CONFORMANCE.append((TorchSampler, Sampler, TorchSampler))
 CONFORMANCE.append((FakeRunner, ModelRunner, FakeRunner))
+CONFORMANCE.append((HFTokenizer, Tokenizer, lambda: HFTokenizer("Qwen/Qwen3-4B", 8192)))
+CONFORMANCE.append(
+    (
+        IncrementalDetokenizer,
+        Detokenizer,
+        lambda: HFTokenizer("Qwen/Qwen3-4B", 8192).new_detokenizer(),
+    )
+)
 
 
 def test_concrete_classes_satisfy_protocols(
