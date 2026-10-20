@@ -11,4 +11,5 @@ logs/
 HANDOFF.md
 .import_linter_cache/
 .tiny-qwen3/
+.superpowers/
 plan/
