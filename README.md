@@ -38,6 +38,21 @@ curl -N localhost:8000/v1/chat/completions -H 'content-type: application/json' \
 Port 8000 matches vLLM, so Open WebUI or anything already pointed at vLLM switches over by
 changing nothing but the server.
 
+## Baseline (MVP, SDPA, no CUDA graphs)
+
+2026-10-20 · NVIDIA DGX Spark (GB10, driver 580.173.02) · `ghcr.io/ethosagent/turbine-serve:0.1.0`
+· Qwen/Qwen3-4B bf16 · `--kv-gb 30` · prompt "Count from 1 to 100, separated by commas.",
+temperature 0, 128 tokens per request, 3 requests per stream:
+
+```bash
+python bench.py --base-url http://127.0.0.1:8000/v1 --concurrency 1 8 --max-tokens 128
+```
+
+| concurrency | requests | total tok/s | per-stream tok/s | mean TTFT ms |
+|---:|---:|---:|---:|---:|
+| 1 | 3 | 19.8 | 19.8 | 53 |
+| 8 | 24 | 144.0 | 18.0 | 127 |
+
 ## Develop
 
 ```bash
