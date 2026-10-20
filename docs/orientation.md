@@ -37,6 +37,7 @@ turbine-serve/
     the server streams SSE chunks ending with `data: [DONE]`.
 
 Follow one request end to end: `jq -c 'select(.request_id=="req_…")' logs/engine.jsonl`.
+The same trip, function by function, with every failure path: [`how-it-works/`](how-it-works/README.md).
 
 ## Milestones
 

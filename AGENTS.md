@@ -89,6 +89,7 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 |---|---|
 | Axioms, layer model, dependency law, module map | `ARCHITECTURE.md` |
 | Repo tour, how a request flows, milestones | `docs/orientation.md` |
+| One request end to end, function by function; error paths; breakpoints | `docs/how-it-works/` |
 | Behavioural rules in full | `docs/conventions.md` |
 | D1–D10 scope decisions | `ARCHITECTURE.md` §V |
 | Qwen3-4B numbers and the Spark's numbers | `docs/qwen3-and-spark.md` |

@@ -12,6 +12,7 @@ RULES: list[tuple[str, int | None, int | None]] = [
     ("tests/**/*.py", 500, None),
     ("docs/*.md", None, 200),
     ("docs/runbooks/*.md", None, 200),
+    ("docs/how-it-works/*.md", None, 200),
     ("CLAUDE.md", None, 150),
     ("AGENTS.md", None, 150),
     ("ARCHITECTURE.md", None, 300),

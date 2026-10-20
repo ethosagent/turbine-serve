@@ -153,7 +153,8 @@ HTTP ─▶ api/server.py ─▶ tokenizer.py ─▶ engine_client.py ─▶ eng
 | `detokenizer.py` | incremental token ids to text, safe across multi-byte characters |
 
 Blocks talk only through `types.py` and swap behind the Protocols in `interfaces.py`;
-import-linter enforces the layering. Full tour: [`docs/orientation.md`](docs/orientation.md).
+import-linter enforces the layering. Function-by-function walkthrough of one request, with
+every error path and a debugging guide: [`docs/how-it-works/`](docs/how-it-works/README.md).
 
 ## Benchmarks
 
