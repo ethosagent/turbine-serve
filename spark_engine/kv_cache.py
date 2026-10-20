@@ -9,7 +9,7 @@ from spark_engine.types import Sequence
 log = get_logger("kv_cache")
 
 
-def compute_num_blocks(  # noqa: PLR0917 - pure sizing formula; positional per the contract
+def compute_num_blocks(
     num_layers: int,
     num_kv_heads: int,
     head_dim: int,
@@ -25,7 +25,7 @@ def compute_num_blocks(  # noqa: PLR0917 - pure sizing formula; positional per t
 class PagedKVCache:
     """One K and one V pool, each [num_layers, num_blocks, block_size, num_kv_heads, head_dim]."""
 
-    def __init__(  # noqa: PLR0917 - positional per the contract
+    def __init__(
         self,
         num_layers: int,
         num_kv_heads: int,
@@ -51,6 +51,7 @@ class PagedKVCache:
         log.info(
             "kv.initialized",
             num_blocks=num_blocks,
+            gb=kv_gb,
             block_size=block_size,
             num_layers=num_layers,
             dtype=str(dtype),

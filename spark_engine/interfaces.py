@@ -30,7 +30,9 @@ class Tokenizer(Protocol):
 @runtime_checkable
 class KVCacheManager(Protocol):
     block_size: int
-    num_free_blocks: int
+
+    @property
+    def num_free_blocks(self) -> int: ...
 
     def can_allocate(self, num_tokens: int) -> bool: ...
     def allocate(self, seq: Sequence, num_tokens: int) -> None: ...

@@ -73,6 +73,7 @@ select = ["E", "F", "I", "B", "UP", "C90", "PL", "RUF"]
 ignore = [
   "PLR2004",  # magic values: shapes and token ids are the vocabulary of this project
   "PLR0913",  # many args: block constructors take explicit dimensions
+  "PLR0917",  # many positional args: block constructors take explicit dimensions
 ]
 mccabe.max-complexity = 12
 pylint.max-statements = 50   # one function fits one screen (docs/conventions.md)
