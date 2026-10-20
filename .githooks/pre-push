@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Same gates as `make check` and CI. Skip once with: git push --no-verify
+exec bash "$(git rev-parse --show-toplevel)/scripts/run-checks.sh"

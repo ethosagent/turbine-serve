@@ -1,0 +1,13 @@
+.venv
+.git
+logs
+.logs
+plan
+docs
+tests
+.claude
+__pycache__
+*.pyc
+.import_linter_cache
+.mypy_cache
+.ruff_cache

@@ -1,0 +1,145 @@
+[project]
+name = "turbine-serve"
+dynamic = ["version"]
+description = "A minimal LLM inference server for Qwen3-4B on NVIDIA DGX Spark, built to learn how vLLM, SGLang, TensorRT-LLM and TensorFold work."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "torch>=2.5",
+  "transformers>=4.51",
+  "safetensors>=0.4",
+  "huggingface_hub>=0.30",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.7",
+  "structlog>=24.1",
+]
+
+[project.scripts]
+turbine = "spark_engine.main:cli"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "httpx>=0.27",
+  "openai>=1.50",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "import-linter>=2.0",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["spark_engine*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "spark_engine.__version__" }
+
+# ---------------------------------------------------------------- uv
+# Linux (CI) installs CPU torch from the PyTorch index: no CUDA wheels in a GPU-less runner.
+# macOS uses PyPI's arm64 wheel. The Spark container never installs torch through uv (Dockerfile).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q -p no:cacheprovider"
+markers = [
+  "gpu: needs a CUDA device (skipped on the Mac)",
+  "e2e: needs a running server at TURBINE_BASE_URL",
+]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["spark_engine", "tests"]
+extend-exclude = ["docs", "plan", "*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C90", "PL", "RUF"]
+ignore = [
+  "PLR2004",  # magic values: shapes and token ids are the vocabulary of this project
+  "PLR0913",  # many args: block constructors take explicit dimensions
+]
+mccabe.max-complexity = 12
+pylint.max-statements = 50   # one function fits one screen (docs/conventions.md)
+pylint.max-branches = 15
+pylint.max-returns = 6
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PLR0915", "PLR0912", "E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+packages = ["spark_engine"]
+strict = true
+warn_unreachable = true
+ignore_missing_imports = true   # transformers, safetensors, huggingface_hub ship partial stubs
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# ---------------------------------------------------------------- import-linter
+# The dependency law (ARCHITECTURE.md §II). Each contract is a named rule; CI fails on violation.
+[tool.importlinter]
+root_package = "spark_engine"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "layers: api -> engine_client -> engine -> blocks -> kernel"
+id = "layer-order"
+type = "layers"
+layers = [
+  "spark_engine.main",
+  "spark_engine.api",
+  "spark_engine.engine_client",
+  "spark_engine.engine",
+  "spark_engine.tokenizer | spark_engine.scheduler | spark_engine.kv_cache | spark_engine.sampler | spark_engine.model_runner | spark_engine.loader | spark_engine.models | spark_engine.attention | spark_engine.testing",
+  "spark_engine.detokenizer | spark_engine.layers",
+  "spark_engine.config",
+  "spark_engine.interfaces",
+  "spark_engine.types | spark_engine.log",
+]
+
+[[tool.importlinter.contracts]]
+name = "api and engine_client never import blocks (the engine is the only composition root)"
+id = "front-door-no-blocks"
+type = "forbidden"
+source_modules = ["spark_engine.api", "spark_engine.engine_client"]
+forbidden_modules = [
+  "spark_engine.scheduler", "spark_engine.kv_cache", "spark_engine.sampler",
+  "spark_engine.model_runner", "spark_engine.loader", "spark_engine.models",
+  "spark_engine.attention", "spark_engine.layers", "spark_engine.testing",
+]
+
+[[tool.importlinter.contracts]]
+name = "api talks to the engine only through engine_client"
+id = "api-only-via-engine-client"
+type = "forbidden"
+source_modules = ["spark_engine.api"]
+forbidden_modules = ["spark_engine.engine"]
+
+[[tool.importlinter.contracts]]
+name = "control plane is pure python: no torch in scheduler, api, engine_client"
+id = "control-plane-no-torch"
+type = "forbidden"
+source_modules = ["spark_engine.scheduler", "spark_engine.api", "spark_engine.engine_client"]
+forbidden_modules = ["torch", "transformers"]

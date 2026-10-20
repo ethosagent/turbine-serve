@@ -1,0 +1,22 @@
+# CI is the enforcement twin of the pre-push hook: it runs the same scripts/check-*.sh via
+# scripts/run-checks.sh. GPU tests skip here (no CUDA); they run on the Spark via scripts/spark.sh.
+name: ci
+on: [push, pull_request]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: bash scripts/run-checks.sh
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: check-logs
+          path: .logs/

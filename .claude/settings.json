@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv lock:*)",
+      "Bash(make:*)",
+      "Bash(bash scripts/:*)",
+      "Bash(scripts/:*)",
+      "Bash(ssh dgx-spark:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(jq:*)"
+    ],
+    "deny": [
+      "Read(./uv.lock)",
+      "Read(./plan/reference/**)",
+      "Read(./logs/**)",
+      "Read(./.logs/**)",
+      "Read(./.venv/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/read_guard.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

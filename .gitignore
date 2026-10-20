@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+logs/
+.logs/
+.DS_Store
+HANDOFF.md
+.import_linter_cache/
+.tiny-qwen3/
+plan/
