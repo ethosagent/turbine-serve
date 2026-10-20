@@ -65,9 +65,10 @@ class EngineClient:
         )
         out_q: asyncio.Queue[TokenOutput] = asyncio.Queue()
         self._queues[seq_id] = out_q  # register first so no output can be missed
-        finished = False
+        submitted = finished = False
         try:
             self._engine.add_request(seq)
+            submitted = True
             log.info(
                 "seq.submitted",
                 request_id=request_id,
@@ -80,7 +81,7 @@ class EngineClient:
                 yield out
         finally:
             del self._queues[seq_id]
-            if not finished:
+            if submitted and not finished:
                 self._engine.abort(seq_id)
                 log.info("seq.aborted", request_id=request_id, seq_id=seq_id)
 

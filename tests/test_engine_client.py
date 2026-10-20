@@ -86,3 +86,13 @@ async def test_impossible_request_raises_value_error(
     client, _ = client_and_kv
     with pytest.raises(ValueError):
         await _collect(client, list(range(5000)), "big")
+
+
+async def test_failed_add_request_logs_no_abort(
+    client_and_kv: tuple[EngineClient, object], capsys: pytest.CaptureFixture[str]
+) -> None:
+    client, _ = client_and_kv
+    with pytest.raises(ValueError):
+        await _collect(client, list(range(5000)), "big")
+    assert "seq.aborted" not in capsys.readouterr().out
+    assert client._queues == {}
