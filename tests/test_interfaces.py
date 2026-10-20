@@ -30,6 +30,8 @@ from spark_engine.sampler import TorchSampler
 from spark_engine.scheduler import FCFSScheduler
 from spark_engine.types import AttentionMetadata
 
+from tests.fakes import FakeRunner
+
 CONFORMANCE: list[tuple[type, type, Callable[[], object]]] = []
 CONFORMANCE.append(
     (PagedKVCache, KVCacheManager, lambda: PagedKVCache(1, 1, 1, 16, 0, "cpu", num_blocks=4))
@@ -42,6 +44,7 @@ CONFORMANCE.append(
     )
 )
 CONFORMANCE.append((TorchSampler, Sampler, TorchSampler))
+CONFORMANCE.append((FakeRunner, ModelRunner, FakeRunner))
 
 
 def test_concrete_classes_satisfy_protocols(
