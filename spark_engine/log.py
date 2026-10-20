@@ -44,7 +44,9 @@ def configure_logging(level: str, log_file: str | None) -> None:
 
 def get_logger(component: str) -> FilteringBoundLogger:
     """A logger with `component` pre-bound; component must equal the calling file's stem."""
-    logger: FilteringBoundLogger = structlog.get_logger().bind(component=component)
+    # Lazy proxy: config is resolved at the first log call, so a module-level
+    # `log = get_logger("x")` created before configure_logging still emits JSON.
+    logger: FilteringBoundLogger = structlog.get_logger(component=component)
     return logger
 
 

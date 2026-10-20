@@ -58,3 +58,14 @@ def test_request_context_is_merged(tmp_path: Path) -> None:
     first, second = _lines(path)
     assert first["request_id"] == "r9"
     assert "request_id" not in second
+
+
+def test_logger_created_before_configure_uses_new_config(tmp_path: Path) -> None:
+    log = get_logger("scheduler")  # module-level pattern: created at import time
+    path = tmp_path / "engine.jsonl"
+    configure_logging("info", str(path))
+    log.debug("step.planned")
+    log.info("seq.admitted", seq_id="s1")
+    lines = _lines(path)
+    assert [line["event"] for line in lines] == ["seq.admitted"]
+    assert lines[0]["component"] == "scheduler" and lines[0]["level"] == "info"
