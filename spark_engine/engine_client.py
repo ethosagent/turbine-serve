@@ -3,7 +3,7 @@
 import asyncio
 import itertools
 import threading
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncGenerator, Callable
 from typing import Protocol
 
 from spark_engine.log import get_logger
@@ -56,7 +56,7 @@ class EngineClient:
 
     async def generate(
         self, prompt_ids: list[int], params: SamplingParams, request_id: str
-    ) -> AsyncIterator[TokenOutput]:
+    ) -> AsyncGenerator[TokenOutput, None]:
         if self._engine.num_waiting >= self._max_queue:
             raise QueueFull(f"{self._engine.num_waiting} requests waiting")
         seq_id = f"s{next(self._counter)}"

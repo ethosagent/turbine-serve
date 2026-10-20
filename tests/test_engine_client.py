@@ -55,7 +55,7 @@ async def test_queue_full_raises() -> None:
 
 
 async def test_cancel_frees_kv() -> None:
-    engine, kv = make_engine(num_blocks=4096)
+    engine, kv = make_engine(num_blocks=4096, eos=())  # no EOS: only the cancel can end it
     client = EngineClient(engine, max_queue=2)
     client.start()
     params = SamplingParams(max_tokens=50000, temperature=0.0)
