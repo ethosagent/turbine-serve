@@ -15,6 +15,7 @@ With no entries the test is skipped, not errored.
 from collections.abc import Callable
 
 import pytest
+from spark_engine.attention.sdpa import SDPAAttention
 from spark_engine.detokenizer import IncrementalDetokenizer
 from spark_engine.interfaces import (
     AttentionBackend,
@@ -45,6 +46,7 @@ CONFORMANCE.append(
         lambda: FCFSScheduler(PagedKVCache(1, 1, 1, 16, 0, "cpu", num_blocks=4), 8, (7,)),
     )
 )
+CONFORMANCE.append((SDPAAttention, AttentionBackend, lambda: SDPAAttention(4, 2, 8)))
 CONFORMANCE.append((TorchSampler, Sampler, TorchSampler))
 CONFORMANCE.append((FakeRunner, ModelRunner, FakeRunner))
 CONFORMANCE.append((HFTokenizer, Tokenizer, lambda: HFTokenizer("Qwen/Qwen3-4B", 8192)))
