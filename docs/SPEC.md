@@ -1,4 +1,4 @@
-# spark-engine MVP spec
+# turbine-serve MVP spec
 
 See CLAUDE.md for scope, decisions and rules. This file details each block.
 
@@ -362,7 +362,7 @@ Libraries: pydantic, argparse
 
 Interface:
 ```
-python -m spark_engine.main --model Qwen/Qwen3-4B --kv-gb 30 \
+python -m turbine_serve.main --model Qwen/Qwen3-4B --kv-gb 30 \
     --max-num-seqs 8 --max-model-len 8192 --port 8000 --log-level info
 ```
 
@@ -380,7 +380,7 @@ Libraries: dataclasses, typing
 
 Interface:
 ```
-from spark_engine.interfaces import Scheduler, KVCacheManager, ModelRunner, \
+from turbine_serve.interfaces import Scheduler, KVCacheManager, ModelRunner, \
     Model, AttentionBackend, Sampler, Tokenizer, Detokenizer
 ```
 

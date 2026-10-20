@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from spark_engine.log import get_logger
+from turbine_serve.log import get_logger
 
 log = get_logger("detokenizer")
 

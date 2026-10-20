@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 import torch
-from spark_engine.engine import Engine
-from spark_engine.kv_cache import PagedKVCache
-from spark_engine.log import configure_logging
-from spark_engine.sampler import TorchSampler
-from spark_engine.scheduler import FCFSScheduler
-from spark_engine.types import SamplingParams, Sequence, TokenOutput
+from turbine_serve.engine import Engine
+from turbine_serve.kv_cache import PagedKVCache
+from turbine_serve.log import configure_logging
+from turbine_serve.sampler import TorchSampler
+from turbine_serve.scheduler import FCFSScheduler
+from turbine_serve.types import SamplingParams, Sequence, TokenOutput
 
 from tests.fakes import FakeRunner, make_engine
 

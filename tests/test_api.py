@@ -9,14 +9,14 @@ from typing import Any
 
 import httpx
 import pytest
-from spark_engine.api.server import _Request, _stream, create_app
-from spark_engine.config import EngineConfig
-from spark_engine.engine import build_engine
-from spark_engine.engine_client import EngineClient
-from spark_engine.interfaces import Detokenizer, EngineLike, Tokenizer
-from spark_engine.log import configure_logging
-from spark_engine.tokenizer import PromptTooLong
-from spark_engine.types import SamplingParams
+from turbine_serve.api.server import _Request, _stream, create_app
+from turbine_serve.config import EngineConfig
+from turbine_serve.engine import build_engine
+from turbine_serve.engine_client import EngineClient
+from turbine_serve.interfaces import Detokenizer, EngineLike, Tokenizer
+from turbine_serve.log import configure_logging
+from turbine_serve.tokenizer import PromptTooLong
+from turbine_serve.types import SamplingParams
 
 from tests.fakes import FakeRunner, make_engine
 

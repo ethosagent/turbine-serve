@@ -5,11 +5,11 @@ One pass over where things live and how a request flows. Laws are in `ARCHITECTU
 ## Layout
 
 ```
-spark-engine/
+turbine-serve/
   pyproject.toml      uv project: deps, ruff, mypy, pytest, import-linter contracts
   Makefile            thin wrappers: make check / test / sync / spark-serve
   scripts/            check-*.sh gates, run-checks.sh, sync.sh, spark.sh, hooks/, handoff.sh
-  spark_engine/       the package (one block per file; see below); testing/ holds the tiny checkpoint writer
+  turbine_serve/       the package (one block per file; see below); testing/ holds the tiny checkpoint writer
   tests/              pytest; fakes.py holds FakeRunner for GPU-free engine tests
   docs/               SPEC.md (block spec), this file, conventions, numbers, runbooks/
   .claude/            settings.json (hooks, deny list) and skills/
@@ -49,12 +49,12 @@ Follow one request end to end: `jq -c 'select(.request_id=="req_…")' logs/engi
 
 Every block is built and tested on the Mac first: the control
 plane against `tests/fakes.py::FakeRunner`, the data plane against a tiny random-weight Qwen3
-checkpoint from `spark_engine/testing/tiny_model.py` (real tensor names, real tokenizer, HF
+checkpoint from `turbine_serve/testing/tiny_model.py` (real tensor names, real tokenizer, HF
 reference model for fp32 parity on CPU). The Spark then runs the
 same tests with the real 8 GB model in bf16 on the GB10, then end to end, image, benchmark.
 
 ## Two machines
 
-Everything runs on the Mac first (`scripts/serve-tiny.sh` serves the tiny model on CPU). Edit on the Mac. `scripts/sync.sh` rsyncs to `dgx-spark:~/spark-engine`; `scripts/spark.sh`
+Everything runs on the Mac first (`scripts/serve-tiny.sh` serves the tiny model on CPU). Edit on the Mac. `scripts/sync.sh` rsyncs to `dgx-spark:~/turbine-serve`; `scripts/spark.sh`
 runs a command inside the `turbine-serve-dev` container with the tree mounted at `/w`.
 Runbook: `docs/runbooks/spark-session.md`.

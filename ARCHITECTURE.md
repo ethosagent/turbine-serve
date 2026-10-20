@@ -1,4 +1,4 @@
-# spark-engine — Architectural Constitution
+# turbine-serve — Architectural Constitution
 
 > The laws of this codebase's structure: axioms, layers, dependency direction, extension
 > boundaries. Short, restrictive, slow to change. Amend deliberately (§VI), never in a drive-by.

@@ -5,9 +5,9 @@ import itertools
 import threading
 from collections.abc import AsyncGenerator
 
-from spark_engine.interfaces import EngineLike
-from spark_engine.log import get_logger
-from spark_engine.types import SamplingParams, Sequence, TokenOutput
+from turbine_serve.interfaces import EngineLike
+from turbine_serve.log import get_logger
+from turbine_serve.types import SamplingParams, Sequence, TokenOutput
 
 log = get_logger("engine_client")
 

@@ -3,9 +3,9 @@
 import importlib
 import pkgutil
 
-import spark_engine
+import turbine_serve
 
 
 def test_every_module_imports() -> None:
-    for info in pkgutil.walk_packages(spark_engine.__path__, prefix="spark_engine."):
+    for info in pkgutil.walk_packages(turbine_serve.__path__, prefix="turbine_serve."):
         importlib.import_module(info.name)

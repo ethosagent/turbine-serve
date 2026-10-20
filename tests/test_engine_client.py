@@ -4,8 +4,8 @@ import asyncio
 from collections.abc import AsyncIterator
 
 import pytest
-from spark_engine.engine_client import EngineClient, QueueFull
-from spark_engine.types import SamplingParams, TokenOutput
+from turbine_serve.engine_client import EngineClient, QueueFull
+from turbine_serve.types import SamplingParams, TokenOutput
 
 from tests.fakes import make_engine
 

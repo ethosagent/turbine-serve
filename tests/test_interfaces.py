@@ -16,10 +16,11 @@ from collections.abc import Callable
 
 import pytest
 import torch
-from spark_engine.attention.sdpa import SDPAAttention
-from spark_engine.detokenizer import IncrementalDetokenizer
-from spark_engine.engine import Engine
-from spark_engine.interfaces import (
+from transformers import Qwen3Config
+from turbine_serve.attention.sdpa import SDPAAttention
+from turbine_serve.detokenizer import IncrementalDetokenizer
+from turbine_serve.engine import Engine
+from turbine_serve.interfaces import (
     AttentionBackend,
     Detokenizer,
     EngineLike,
@@ -30,14 +31,13 @@ from spark_engine.interfaces import (
     Scheduler,
     Tokenizer,
 )
-from spark_engine.kv_cache import PagedKVCache
-from spark_engine.model_runner import GPUModelRunner
-from spark_engine.models.qwen3 import Qwen3Model
-from spark_engine.sampler import TorchSampler
-from spark_engine.scheduler import FCFSScheduler
-from spark_engine.tokenizer import HFTokenizer
-from spark_engine.types import AttentionMetadata
-from transformers import Qwen3Config
+from turbine_serve.kv_cache import PagedKVCache
+from turbine_serve.model_runner import GPUModelRunner
+from turbine_serve.models.qwen3 import Qwen3Model
+from turbine_serve.sampler import TorchSampler
+from turbine_serve.scheduler import FCFSScheduler
+from turbine_serve.tokenizer import HFTokenizer
+from turbine_serve.types import AttentionMetadata
 
 from tests.fakes import FakeRunner, make_engine
 

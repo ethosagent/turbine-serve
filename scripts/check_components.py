@@ -9,7 +9,7 @@ import ast
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "spark_engine"
+ROOT = Path(__file__).resolve().parents[1] / "turbine_serve"
 
 
 def main() -> int:

@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 import torch
-from spark_engine.engine import Engine
-from spark_engine.loader import iter_weights
-from spark_engine.models import get_model_cls
-from spark_engine.models.qwen3 import Qwen3Model
-from spark_engine.tokenizer import HFTokenizer
-from spark_engine.types import SamplingParams
 from transformers import AutoConfig, Qwen3ForCausalLM
+from turbine_serve.engine import Engine
+from turbine_serve.loader import iter_weights
+from turbine_serve.models import get_model_cls
+from turbine_serve.models.qwen3 import Qwen3Model
+from turbine_serve.tokenizer import HFTokenizer
+from turbine_serve.types import SamplingParams
 
 from tests.model_cases import (
     PARITY_MESSAGES,

@@ -1,10 +1,10 @@
-# spark-engine — agent map
+# turbine-serve — agent map
 
-A minimal LLM inference server (distribution `turbine-serve`, package `spark_engine`) that serves
+A minimal LLM inference server (distribution `turbine-serve`, package `turbine_serve`) that serves
 Qwen3-4B on one NVIDIA DGX Spark through an OpenAI-compatible API, built from scratch to learn how
 vLLM, SGLang, TensorRT-LLM and TensorFold work. Correctness over speed; speed-ups plug in later.
 
-- `spark_engine/` — one block per file in request order: `api/server.py` → `tokenizer.py` →
+- `turbine_serve/` — one block per file in request order: `api/server.py` → `tokenizer.py` →
   `engine_client.py` → `engine.py` → `scheduler.py` · `kv_cache.py` · `model_runner.py` →
   `models/qwen3.py` · `attention/sdpa.py` → `sampler.py` → `detokenizer.py`. Kernel:
   `types.py` (contracts), `interfaces.py` (Protocols), `config.py`, `log.py`.
@@ -63,7 +63,7 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 
 - Everything is tested on the Mac first. Control plane: `tests/fakes.py::FakeRunner`. Data plane
   (loader, model, attention, runner, parity): the tiny checkpoint from
-  `spark_engine/testing/tiny_model.py` on CPU in fp32, with `transformers` as the reference.
+  `turbine_serve/testing/tiny_model.py` on CPU in fp32, with `transformers` as the reference.
   `scripts/serve-tiny.sh` serves it so the API runs end to end on the Mac.
 - The Spark runs the SAME tests with `TURBINE_REAL_MODEL=1` (real weights, cuda; fp32 gated,
   bf16 reported). A failure seen on the Spark is reproduced on the Mac first if it is structural, then fixed here.

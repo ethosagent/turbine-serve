@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 import torch
-from spark_engine.engine import build_engine
-from spark_engine.types import SamplingParams
+from turbine_serve.engine import build_engine
+from turbine_serve.types import SamplingParams
 
 from tests.model_cases import (
     PARITY_MESSAGES,

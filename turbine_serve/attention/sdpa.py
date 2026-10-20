@@ -6,8 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 
-from spark_engine.log import get_logger
-from spark_engine.types import AttentionMetadata, SchedulerOutput
+from turbine_serve.log import get_logger
+from turbine_serve.types import AttentionMetadata, SchedulerOutput
 
 log = get_logger("sdpa")
 

@@ -1,7 +1,7 @@
 ---
 name: engine-debug
 description: >-
-  Debug playbook for spark-engine: garbage or repeated output, parity mismatch against
+  Debug playbook for turbine-serve: garbage or repeated output, parity mismatch against
   transformers, wrong shapes, CUDA OOM on the Spark, a request that hangs, log forensics with jq.
   Use when output is wrong, a gpu test fails, or "it worked in HF but not here". Gotchas are
   appended here in the same commit that found them.

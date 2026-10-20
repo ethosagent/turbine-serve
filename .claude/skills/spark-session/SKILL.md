@@ -35,17 +35,17 @@ Rules that must never be missed:
 6. **Tests:** `scripts/spark.sh pytest tests/test_<x>.py -q -m gpu` for one file;
    `scripts/spark.sh pytest -q` for everything. Quiet output; pipe through `tail -40` if long.
 7. **Serve:** `make spark-serve` (foreground). In a second terminal the e2e tests run on the
-   Spark host: `ssh dgx-spark 'cd ~/spark-engine && TURBINE_BASE_URL=http://127.0.0.1:8000/v1 ~/.venvs/e2e/bin/pytest tests/test_api_e2e.py -q'`
+   Spark host: `ssh dgx-spark 'cd ~/turbine-serve && TURBINE_BASE_URL=http://127.0.0.1:8000/v1 ~/.venvs/e2e/bin/pytest tests/test_api_e2e.py -q'`
    (host venv once: `python3 -m venv ~/.venvs/e2e && ~/.venvs/e2e/bin/pip install pytest openai`).
-8. **Logs:** `logs/engine.jsonl` lives in `~/spark-engine/logs` on the Spark.
-   `ssh dgx-spark "jq -c 'select(.level==\"error\")' ~/spark-engine/logs/engine.jsonl | tail -5"`.
+8. **Logs:** `logs/engine.jsonl` lives in `~/turbine-serve/logs` on the Spark.
+   `ssh dgx-spark "jq -c 'select(.level==\"error\")' ~/turbine-serve/logs/engine.jsonl | tail -5"`.
 9. **End:** `ssh dgx-spark docker start qwen38-flash`. Say so in the hand-off.
 
 ## Reference
 
 - Host: `dgx-spark` in `~/.ssh/config` (192.168.1.49, user miteshsharma). Docker 29, GB10,
   driver 580, container `nvcr.io/nvidia/pytorch:26.07-py3` (torch 2.13 NVIDIA build, CUDA 13.3).
-- `scripts/spark.sh` runs `docker run --rm --gpus all --ipc=host -v ~/spark-engine:/w -w /w
+- `scripts/spark.sh` runs `docker run --rm --gpus all --ipc=host -v ~/turbine-serve:/w -w /w
   -v ~/.cache/huggingface:/root/.cache/huggingface -e PYTHONPATH=/w turbine-serve-dev <cmd>`.
 - The server inside the container binds `0.0.0.0`; `-p 127.0.0.1:8000:8000` keeps it local to
   the Spark. From the Mac, reach it only through `ssh dgx-spark curl ...`.

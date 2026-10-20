@@ -1,7 +1,7 @@
 """Attention backend registry: --attention-backend name -> class."""
 
-from spark_engine.attention.sdpa import SDPAAttention
-from spark_engine.interfaces import AttentionBackend
+from turbine_serve.attention.sdpa import SDPAAttention
+from turbine_serve.interfaces import AttentionBackend
 
 ATTENTION_BACKENDS: dict[str, type[AttentionBackend]] = {"sdpa": SDPAAttention}
 

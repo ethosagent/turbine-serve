@@ -1,7 +1,7 @@
 ---
 name: milestone-workflow
 description: >-
-  The workflow spine for changing spark-engine code: pick a plan task, write the failing test,
+  The workflow spine for changing turbine-serve code: pick a plan task, write the failing test,
   implement the block, run make check, commit. Use for ANY feature, fix, refactor or plan task in
   this repo ("implement task 4", "add the scheduler", "fix the sampler", "continue the plan").
 ---

@@ -5,9 +5,9 @@ from typing import Any
 
 from transformers import AutoTokenizer
 
-from spark_engine.detokenizer import IncrementalDetokenizer
-from spark_engine.interfaces import Detokenizer
-from spark_engine.log import get_logger
+from turbine_serve.detokenizer import IncrementalDetokenizer
+from turbine_serve.interfaces import Detokenizer
+from turbine_serve.log import get_logger
 
 log = get_logger("tokenizer")
 

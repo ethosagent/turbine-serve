@@ -16,7 +16,7 @@ RUN uv export --frozen --group dev --no-emit-project --no-hashes -o /tmp/require
 
 FROM deps AS release
 COPY README.md ./
-COPY spark_engine ./spark_engine
+COPY turbine_serve ./turbine_serve
 RUN uv pip install --system --break-system-packages --no-cache --no-deps .
 EXPOSE 8000
 ENTRYPOINT ["turbine", "serve", "--host", "0.0.0.0"]

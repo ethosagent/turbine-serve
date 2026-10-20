@@ -1,8 +1,8 @@
 """Tokenizer and incremental detokenizer against the real Qwen3 tokenizer (cached after first run)."""
 
 import pytest
-from spark_engine.detokenizer import IncrementalDetokenizer
-from spark_engine.tokenizer import HFTokenizer, PromptTooLong
+from turbine_serve.detokenizer import IncrementalDetokenizer
+from turbine_serve.tokenizer import HFTokenizer, PromptTooLong
 
 MESSAGES = [{"role": "user", "content": "hi"}]
 

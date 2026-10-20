@@ -3,7 +3,7 @@ property, and dtype round trip."""
 
 import pytest
 import torch
-from spark_engine.layers.ops import apply_rope, rms_norm, rope_cos_sin, silu_and_mul
+from turbine_serve.layers.ops import apply_rope, rms_norm, rope_cos_sin, silu_and_mul
 
 T, H, D = 6, 3, 8
 EPS = 1e-6

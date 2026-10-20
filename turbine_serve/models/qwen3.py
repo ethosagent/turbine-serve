@@ -8,10 +8,10 @@ import torch.nn.functional as F
 from torch import Tensor
 from transformers import PretrainedConfig
 
-from spark_engine.interfaces import AttentionBackend, KVCacheManager
-from spark_engine.layers.ops import apply_rope, rms_norm, rope_cos_sin, silu_and_mul
-from spark_engine.log import get_logger
-from spark_engine.types import ForwardBatch
+from turbine_serve.interfaces import AttentionBackend, KVCacheManager
+from turbine_serve.layers.ops import apply_rope, rms_norm, rope_cos_sin, silu_and_mul
+from turbine_serve.log import get_logger
+from turbine_serve.types import ForwardBatch
 
 log = get_logger("qwen3")
 

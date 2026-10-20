@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 import structlog
-from spark_engine.log import bind_request, clear_request, configure_logging, get_logger
+from turbine_serve.log import bind_request, clear_request, configure_logging, get_logger
 
 
 @pytest.fixture(autouse=True)

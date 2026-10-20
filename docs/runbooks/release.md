@@ -1,8 +1,8 @@
 # Runbook — build and ship the image
 
-1. Bump `__version__` in `spark_engine/__init__.py` (pyproject reads it dynamically). Commit.
+1. Bump `__version__` in `turbine_serve/__init__.py` (pyproject reads it dynamically). Commit.
 2. `make sync` then on the Spark:
-   `ssh dgx-spark 'cd ~/spark-engine && docker build -t ghcr.io/ethosagent/turbine-serve:<v> .'`
+   `ssh dgx-spark 'cd ~/turbine-serve && docker build -t ghcr.io/ethosagent/turbine-serve:<v> .'`
 3. Smoke test exactly as users run it:
    ```
    docker run --rm --gpus all --ipc=host -p 127.0.0.1:8000:8000 \

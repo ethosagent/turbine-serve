@@ -13,10 +13,10 @@ from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from spark_engine.engine_client import EngineClient, QueueFull
-from spark_engine.interfaces import Detokenizer, Tokenizer
-from spark_engine.log import bind_request, clear_request, get_logger
-from spark_engine.types import SamplingParams, TokenOutput
+from turbine_serve.engine_client import EngineClient, QueueFull
+from turbine_serve.interfaces import Detokenizer, Tokenizer
+from turbine_serve.log import bind_request, clear_request, get_logger
+from turbine_serve.types import SamplingParams, TokenOutput
 
 log = get_logger("api")
 

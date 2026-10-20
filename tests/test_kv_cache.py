@@ -1,7 +1,7 @@
 import pytest
 import torch
-from spark_engine.kv_cache import PagedKVCache, compute_num_blocks
-from spark_engine.types import SamplingParams, Sequence
+from turbine_serve.kv_cache import PagedKVCache, compute_num_blocks
+from turbine_serve.types import SamplingParams, Sequence
 
 HKV, D, BS = 2, 8, 16
 

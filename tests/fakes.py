@@ -1,12 +1,12 @@
 """Test doubles for the control plane: a deterministic ModelRunner and an engine builder."""
 
 import torch
-from spark_engine.engine import Engine
-from spark_engine.kv_cache import PagedKVCache
-from spark_engine.sampler import TorchSampler
-from spark_engine.scheduler import FCFSScheduler
-from spark_engine.types import SchedulerOutput
 from torch import Tensor
+from turbine_serve.engine import Engine
+from turbine_serve.kv_cache import PagedKVCache
+from turbine_serve.sampler import TorchSampler
+from turbine_serve.scheduler import FCFSScheduler
+from turbine_serve.types import SchedulerOutput
 
 
 class FakeRunner:

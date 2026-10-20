@@ -1,4 +1,4 @@
-# Conventions — behavioural rules and spark-engine specifics
+# Conventions — behavioural rules and turbine-serve specifics
 
 `CLAUDE.md` carries the condensed version; this file is the authority when it is ambiguous.
 
@@ -19,7 +19,7 @@
    way it is, read `docs/SPEC.md` for that block, then ask.
 7. **Follow the constitution.** `ARCHITECTURE.md` before moving modules or crossing layers.
 
-## spark-engine specifics
+## turbine-serve specifics
 
 - **One block, one file, one component.** The log `component` is the file name; the gate
   `scripts/check-components.sh` enforces it. Events are `noun.verb` (`seq.admitted`,
@@ -31,7 +31,7 @@
   `AutoConfig`; literal numbers appear only in tests.
 - **Fakes over mocks, tiny over fake where the real code can run.** `tests/fakes.py::FakeRunner`
   returns deterministic logits (next token = last token + 1) for control-plane tests. Data-plane
-  tests run the real code on CPU against `spark_engine/testing/tiny_model.py` (2-layer random
+  tests run the real code on CPU against `turbine_serve/testing/tiny_model.py` (2-layer random
   Qwen3 with the real tokenizer) and compare with `transformers`. Nothing is patched.
 - **Device and dtype are config.** No `.cuda()` in blocks; `device`/`dtype` flow from
   `EngineConfig`. `torch.cuda.synchronize()` only when the device is cuda.

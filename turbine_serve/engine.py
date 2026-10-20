@@ -7,18 +7,18 @@ from collections.abc import Callable
 
 from transformers import AutoConfig
 
-from spark_engine.attention import get_attention_backend
-from spark_engine.config import EngineConfig
-from spark_engine.interfaces import ModelRunner, Sampler, Scheduler
-from spark_engine.kv_cache import PagedKVCache
-from spark_engine.loader import iter_weights, resolve_model_path
-from spark_engine.log import get_logger
-from spark_engine.model_runner import GPUModelRunner
-from spark_engine.models import get_model_cls
-from spark_engine.sampler import TorchSampler
-from spark_engine.scheduler import FCFSScheduler
-from spark_engine.tokenizer import HFTokenizer
-from spark_engine.types import (
+from turbine_serve.attention import get_attention_backend
+from turbine_serve.config import EngineConfig
+from turbine_serve.interfaces import ModelRunner, Sampler, Scheduler
+from turbine_serve.kv_cache import PagedKVCache
+from turbine_serve.loader import iter_weights, resolve_model_path
+from turbine_serve.log import get_logger
+from turbine_serve.model_runner import GPUModelRunner
+from turbine_serve.models import get_model_cls
+from turbine_serve.sampler import TorchSampler
+from turbine_serve.scheduler import FCFSScheduler
+from turbine_serve.tokenizer import HFTokenizer
+from turbine_serve.types import (
     SamplingParams,
     SchedulerOutput,
     SeqStatus,

@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from typing import Literal
 
 import torch
-from spark_engine.config import EngineConfig
-from spark_engine.engine import Engine
-from spark_engine.types import SamplingParams, ScheduledSeq, SchedulerOutput, Sequence
 from transformers import Qwen3ForCausalLM
+from turbine_serve.config import EngineConfig
+from turbine_serve.engine import Engine
+from turbine_serve.types import SamplingParams, ScheduledSeq, SchedulerOutput, Sequence
 
 REAL_MODEL = "Qwen/Qwen3-4B"
 PARITY_MESSAGES = [{"role": "user", "content": "Explain the paged KV cache in two sentences."}]

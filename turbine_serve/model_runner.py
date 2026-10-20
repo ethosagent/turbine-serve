@@ -3,9 +3,9 @@
 import torch
 from torch import Tensor
 
-from spark_engine.interfaces import AttentionBackend, KVCacheManager, Model
-from spark_engine.log import get_logger
-from spark_engine.types import ForwardBatch, SchedulerOutput
+from turbine_serve.interfaces import AttentionBackend, KVCacheManager, Model
+from turbine_serve.log import get_logger
+from turbine_serve.types import ForwardBatch, SchedulerOutput
 
 log = get_logger("model_runner")
 

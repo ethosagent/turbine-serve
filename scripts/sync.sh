@@ -5,5 +5,5 @@ set -euo pipefail; cd "$(dirname "${BASH_SOURCE[0]}")/.."
 rsync -az --delete \
   --exclude .venv --exclude .git --exclude logs --exclude .logs \
   --exclude __pycache__ --exclude .pytest_cache --exclude .mypy_cache --exclude .ruff_cache \
-  ./ dgx-spark:~/spark-engine/
-echo "synced → dgx-spark:~/spark-engine"
+  ./ dgx-spark:~/turbine-serve/
+echo "synced → dgx-spark:~/turbine-serve"

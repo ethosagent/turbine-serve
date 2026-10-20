@@ -3,11 +3,11 @@ import math
 
 import pytest
 import torch
-from spark_engine.attention import ATTENTION_BACKENDS, get_attention_backend
-from spark_engine.attention.sdpa import SDPAAttention
-from spark_engine.log import configure_logging
-from spark_engine.types import SamplingParams, ScheduledSeq, SchedulerOutput, Sequence
 from torch import Tensor
+from turbine_serve.attention import ATTENTION_BACKENDS, get_attention_backend
+from turbine_serve.attention.sdpa import SDPAAttention
+from turbine_serve.log import configure_logging
+from turbine_serve.types import SamplingParams, ScheduledSeq, SchedulerOutput, Sequence
 
 HQ, HKV, D, BS = 4, 2, 8, 4
 NUM_BLOCKS = 8

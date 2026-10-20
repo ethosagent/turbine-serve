@@ -5,7 +5,7 @@ from typing import Literal
 import torch
 from pydantic import BaseModel
 
-from spark_engine.log import get_logger
+from turbine_serve.log import get_logger
 
 log = get_logger("config")
 

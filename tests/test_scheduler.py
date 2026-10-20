@@ -1,9 +1,9 @@
 """FCFSScheduler: admission with KV reservation, EOS/length finish, abort/fail."""
 
 import pytest
-from spark_engine.kv_cache import PagedKVCache
-from spark_engine.scheduler import FCFSScheduler
-from spark_engine.types import SamplingParams, SeqStatus, Sequence
+from turbine_serve.kv_cache import PagedKVCache
+from turbine_serve.scheduler import FCFSScheduler
+from turbine_serve.types import SamplingParams, SeqStatus, Sequence
 
 EOS = (7, 11)
 

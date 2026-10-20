@@ -8,9 +8,9 @@ from typing import Any
 import pytest
 import torch
 from pydantic import BaseModel
-from spark_engine import main
-from spark_engine.config import EngineConfig
-from spark_engine.main import _add_field_flags, config_from_args
+from turbine_serve import main
+from turbine_serve.config import EngineConfig
+from turbine_serve.main import _add_field_flags, config_from_args
 
 
 def test_defaults_match_decisions() -> None:

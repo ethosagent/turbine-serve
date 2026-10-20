@@ -5,8 +5,8 @@ import time
 import torch
 from torch import Tensor
 
-from spark_engine.log import get_logger
-from spark_engine.types import Sequence
+from turbine_serve.log import get_logger
+from turbine_serve.types import Sequence
 
 log = get_logger("sampler")
 

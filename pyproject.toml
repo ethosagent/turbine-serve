@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-turbine = "spark_engine.main:cli"
+turbine = "turbine_serve.main:cli"
 
 [dependency-groups]
 dev = [
@@ -35,10 +35,10 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["spark_engine*"]
+include = ["turbine_serve*"]
 
 [tool.setuptools.dynamic]
-version = { attr = "spark_engine.__version__" }
+version = { attr = "turbine_serve.__version__" }
 
 # ---------------------------------------------------------------- uv
 # Linux (CI) installs CPU torch from the PyTorch index: no CUDA wheels in a GPU-less runner.
@@ -66,7 +66,7 @@ markers = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["spark_engine", "tests"]
+src = ["turbine_serve", "tests"]
 extend-exclude = ["docs", "*.md"]
 
 [tool.ruff.lint]
@@ -90,7 +90,7 @@ quote-style = "double"
 # ---------------------------------------------------------------- mypy
 [tool.mypy]
 python_version = "3.12"
-packages = ["spark_engine"]
+packages = ["turbine_serve"]
 strict = true
 warn_unreachable = true
 ignore_missing_imports = true   # transformers, safetensors, huggingface_hub ship partial stubs
@@ -102,7 +102,7 @@ disallow_untyped_defs = false
 # ---------------------------------------------------------------- import-linter
 # The dependency law (ARCHITECTURE.md §II). Each contract is a named rule; CI fails on violation.
 [tool.importlinter]
-root_package = "spark_engine"
+root_package = "turbine_serve"
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
@@ -110,39 +110,39 @@ name = "layers: api -> engine_client -> engine -> blocks -> kernel"
 id = "layer-order"
 type = "layers"
 layers = [
-  "spark_engine.main",
-  "spark_engine.api",
-  "spark_engine.engine_client",
-  "spark_engine.engine",
-  "spark_engine.tokenizer | spark_engine.scheduler | spark_engine.kv_cache | spark_engine.sampler | spark_engine.model_runner | spark_engine.loader | spark_engine.models | spark_engine.attention | spark_engine.testing",
-  "spark_engine.detokenizer | spark_engine.layers",
-  "spark_engine.config",
-  "spark_engine.interfaces",
-  "spark_engine.types | spark_engine.log",
+  "turbine_serve.main",
+  "turbine_serve.api",
+  "turbine_serve.engine_client",
+  "turbine_serve.engine",
+  "turbine_serve.tokenizer | turbine_serve.scheduler | turbine_serve.kv_cache | turbine_serve.sampler | turbine_serve.model_runner | turbine_serve.loader | turbine_serve.models | turbine_serve.attention | turbine_serve.testing",
+  "turbine_serve.detokenizer | turbine_serve.layers",
+  "turbine_serve.config",
+  "turbine_serve.interfaces",
+  "turbine_serve.types | turbine_serve.log",
 ]
 
 [[tool.importlinter.contracts]]
 name = "api and engine_client never import blocks (the engine is the only composition root)"
 id = "front-door-no-blocks"
 type = "forbidden"
-source_modules = ["spark_engine.api", "spark_engine.engine_client"]
+source_modules = ["turbine_serve.api", "turbine_serve.engine_client"]
 forbidden_modules = [
-  "spark_engine.scheduler", "spark_engine.kv_cache", "spark_engine.sampler",
-  "spark_engine.model_runner", "spark_engine.loader", "spark_engine.models",
-  "spark_engine.attention", "spark_engine.layers", "spark_engine.testing",
+  "turbine_serve.scheduler", "turbine_serve.kv_cache", "turbine_serve.sampler",
+  "turbine_serve.model_runner", "turbine_serve.loader", "turbine_serve.models",
+  "turbine_serve.attention", "turbine_serve.layers", "turbine_serve.testing",
 ]
 
 [[tool.importlinter.contracts]]
 name = "api talks to the engine only through engine_client"
 id = "api-only-via-engine-client"
 type = "forbidden"
-source_modules = ["spark_engine.api"]
-forbidden_modules = ["spark_engine.engine"]
+source_modules = ["turbine_serve.api"]
+forbidden_modules = ["turbine_serve.engine"]
 
 [[tool.importlinter.contracts]]
 name = "control plane is pure python: no torch in scheduler, api, engine_client"
 id = "control-plane-no-torch"
 type = "forbidden"
-source_modules = ["spark_engine.scheduler", "spark_engine.api", "spark_engine.engine_client"]
+source_modules = ["turbine_serve.scheduler", "turbine_serve.api", "turbine_serve.engine_client"]
 forbidden_modules = ["torch", "transformers"]
 allow_indirect_imports = true  # intent: no direct torch use; types.py may import it

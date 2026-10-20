@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 
 import pytest
-from spark_engine.engine import Engine
-from spark_engine.log import configure_logging
-from spark_engine.tokenizer import HFTokenizer
-from spark_engine.types import SamplingParams
+from turbine_serve.engine import Engine
+from turbine_serve.log import configure_logging
+from turbine_serve.tokenizer import HFTokenizer
+from turbine_serve.types import SamplingParams
 
 from tests.model_cases import ModelCase, engine_logits, top2
 

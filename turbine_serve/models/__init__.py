@@ -1,6 +1,6 @@
 """Model registry: HF model_type -> Model class."""
 
-from spark_engine.models.qwen3 import Qwen3Model
+from turbine_serve.models.qwen3 import Qwen3Model
 
 MODEL_CLASSES: dict[str, type[Qwen3Model]] = {"qwen3": Qwen3Model}
 

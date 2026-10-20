@@ -7,11 +7,11 @@ from typing import Any, Literal, get_args, get_origin
 import uvicorn
 from pydantic import BaseModel
 
-from spark_engine.api.server import create_app
-from spark_engine.config import EngineConfig, log_resolved
-from spark_engine.engine import build_engine
-from spark_engine.engine_client import EngineClient
-from spark_engine.log import configure_logging, get_logger
+from turbine_serve.api.server import create_app
+from turbine_serve.config import EngineConfig, log_resolved
+from turbine_serve.engine import build_engine
+from turbine_serve.engine_client import EngineClient
+from turbine_serve.log import configure_logging, get_logger
 
 log = get_logger("main")
 

@@ -6,7 +6,7 @@ the Mac). The real case is fp32 because M2 is gated on fp32-on-cuda parity (ARCH
 reported by tests/test_bf16_report.py. Engine fixtures are module-scoped; the real ones free GPU
 memory before they build.
 
-torch and spark_engine are imported inside the hooks/fixtures that need them, so the e2e tests
+torch and turbine_serve are imported inside the hooks/fixtures that need them, so the e2e tests
 load with only pytest + openai installed (the Spark host venv has no torch).
 """
 # ruff: noqa: PLC0415  (function-level imports are the point: see the docstring)
@@ -21,8 +21,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from spark_engine.engine import Engine
-    from spark_engine.tokenizer import HFTokenizer
+    from turbine_serve.engine import Engine
+    from turbine_serve.tokenizer import HFTokenizer
 
     from tests.model_cases import ModelCase
 
@@ -47,7 +47,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
 @pytest.fixture(scope="session")
 def tiny_model_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """A 2-layer random Qwen3 checkpoint with the real tokenizer, built once per session."""
-    from spark_engine.testing.tiny_model import make_tiny_qwen3
+    from turbine_serve.testing.tiny_model import make_tiny_qwen3
 
     return make_tiny_qwen3(tmp_path_factory.mktemp("tiny-qwen3"))
 
@@ -55,7 +55,7 @@ def tiny_model_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
 @pytest.fixture(scope="session")
 def real_model_dir() -> str:
     """The real Qwen3-4B snapshot; skips unless TURBINE_REAL_MODEL=1 on a CUDA machine."""
-    from spark_engine.loader import resolve_model_path
+    from turbine_serve.loader import resolve_model_path
 
     from tests.model_cases import REAL_MODEL
 
@@ -68,8 +68,8 @@ def real_model_dir() -> str:
 
 @pytest.fixture(scope="module")
 def tiny_engine(tiny_model_dir: Path) -> tuple[Engine, HFTokenizer]:
-    from spark_engine.config import EngineConfig
-    from spark_engine.engine import build_engine
+    from turbine_serve.config import EngineConfig
+    from turbine_serve.engine import build_engine
 
     config = EngineConfig(model=str(tiny_model_dir), device="cpu", dtype="float32", kv_gb=0.01)
     return build_engine(config)
@@ -92,7 +92,7 @@ def model_engine(
     model_case: ModelCase, request: pytest.FixtureRequest
 ) -> Iterator[tuple[Engine, HFTokenizer]]:
     """The engine for the current case: the shared tiny engine, or a fresh real fp32 engine."""
-    from spark_engine.engine import build_engine
+    from turbine_serve.engine import build_engine
 
     from tests.model_cases import free_gpu_memory
 

@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 import torch
-from spark_engine.loader import iter_weights, resolve_model_path
-from spark_engine.testing.tiny_model import make_tiny_qwen3
 from transformers import AutoTokenizer
+from turbine_serve.loader import iter_weights, resolve_model_path
+from turbine_serve.testing.tiny_model import make_tiny_qwen3
 
 
 def test_tiny_checkpoint_has_real_names(tiny_model_dir: Path) -> None:

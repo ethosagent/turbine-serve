@@ -1,4 +1,4 @@
-# spark-engine — thin wrappers over uv and scripts/. `make help` lists targets.
+# turbine-serve — thin wrappers over uv and scripts/. `make help` lists targets.
 GATES := $(patsubst scripts/check-%.sh,%,$(wildcard scripts/check-*.sh))
 .PHONY: help install check fmt sync spark-build spark-test spark-serve handoff test $(GATES)
 
@@ -20,7 +20,7 @@ test: tests
 fmt: ## ruff format + autofix imports
 	uv run ruff format . && uv run ruff check --fix .
 
-sync: ## rsync the tree to dgx-spark:~/spark-engine
+sync: ## rsync the tree to dgx-spark:~/turbine-serve
 	bash scripts/sync.sh
 spark-build: ## build the dev image on the Spark
 	bash scripts/spark.sh --build

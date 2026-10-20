@@ -1,8 +1,8 @@
 """Sampler tests: greedy, seeded reproducibility, top-k / top-p filtering, row independence."""
 
 import torch
-from spark_engine.sampler import TorchSampler, draw_seed
-from spark_engine.types import SamplingParams, Sequence
+from turbine_serve.sampler import TorchSampler, draw_seed
+from turbine_serve.types import SamplingParams, Sequence
 
 V = 16
 DRAWS = 200

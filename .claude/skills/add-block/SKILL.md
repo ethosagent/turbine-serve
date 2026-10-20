@@ -1,7 +1,7 @@
 ---
 name: add-block
 description: >-
-  Recipe for adding a swappable block to spark-engine: a new attention backend (FlashInfer), a
+  Recipe for adding a swappable block to turbine-serve: a new attention backend (FlashInfer), a
   new model family, a prefix-caching KV manager, another sampler, or a new scheduling policy.
   Use when asked to "add a backend", "support another model", "plug in X", or extend a Protocol.
 ---
@@ -31,7 +31,7 @@ Rules that must never be missed:
    | sampler | `Sampler` | wired in `engine.build_engine` | `--sampler <name>` (add) |
    | scheduling policy | `Scheduler` | wired in `engine.build_engine` | `--scheduler <name>` (add) |
 
-2. **Write the file** `spark_engine/<package>/<name>.py` (or `spark_engine/<name>.py` for
+2. **Write the file** `turbine_serve/<package>/<name>.py` (or `turbine_serve/<name>.py` for
    top-level blocks). `get_logger("<name>")`. Shape comments on every tensor line.
 3. **Register** by name. Unknown names raise `ValueError` listing the known ones.
 4. **Config.** Add the field to `EngineConfig` with the old behaviour as default; `main.py`

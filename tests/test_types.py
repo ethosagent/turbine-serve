@@ -1,9 +1,9 @@
-"""Contract tests for spark_engine.types."""
+"""Contract tests for turbine_serve.types."""
 
 import dataclasses
 
 import pytest
-from spark_engine.types import SamplingParams, SeqStatus, Sequence, TokenOutput
+from turbine_serve.types import SamplingParams, SeqStatus, Sequence, TokenOutput
 
 
 def test_sampling_defaults() -> None:

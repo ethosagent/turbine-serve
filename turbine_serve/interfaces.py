@@ -5,7 +5,7 @@ from typing import Any, Protocol, runtime_checkable
 
 from torch import Tensor
 
-from spark_engine.types import (
+from turbine_serve.types import (
     AttentionMetadata,
     ForwardBatch,
     SchedulerOutput,

@@ -8,7 +8,7 @@ import torch
 from huggingface_hub import snapshot_download
 from safetensors import safe_open
 
-from spark_engine.log import get_logger
+from turbine_serve.log import get_logger
 
 log = get_logger("loader")
 
