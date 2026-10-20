@@ -3,6 +3,7 @@
 A minimal LLM inference server for Qwen3-4B on NVIDIA DGX Spark, with an OpenAI-compatible API.
 
 [![docker](https://img.shields.io/docker/v/miteshdocker123/turbine-serve?label=docker&sort=semver)](https://hub.docker.com/r/miteshdocker123/turbine-serve)
+[![pypi](https://img.shields.io/pypi/v/turbine-serve)](https://pypi.org/project/turbine-serve/)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![hardware](https://img.shields.io/badge/hardware-DGX%20Spark%20(GB10)-76b900)
 ![api](https://img.shields.io/badge/API-OpenAI--compatible-black)
@@ -26,6 +27,9 @@ docker run --gpus all --ipc=host -p 127.0.0.1:8000:8000 \
 `--gpus all` gives the container the GPU. `--ipc=host` gives PyTorch enough shared memory.
 `-p 127.0.0.1:8000:8000` makes it reachable only from your own machine. The `-v` mount reuses
 your Hugging Face cache, so weights are downloaded once and never baked into the image.
+
+The image is arm64 only (built for the DGX Spark) and about 11 GB to pull, almost all of it the
+NVIDIA PyTorch base (CUDA, cuDNN, NCCL, PyTorch). Model weights are not included.
 
 pip (second way):
 
@@ -116,16 +120,6 @@ Built:
 - [x] Sampling: greedy, temperature, top-p, top-k, seed
 - [x] Back-pressure (`503` when the queue is full) and client-disconnect cleanup
 - [x] One JSON log line per event, every line tagged with its `request_id`
-
-Planned:
-
-- [ ] CUDA graphs
-- [ ] FlashInfer attention
-- [ ] Prefix cache
-- [ ] Chunked prefill
-- [ ] FP8 weights
-- [ ] Speculative decoding
-- [ ] Overlap scheduling
 
 ## How it works
 
