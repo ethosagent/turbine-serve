@@ -76,7 +76,10 @@ class Engine:
         if not sched.seqs:
             return []
         outs = self._execute(sched, _ms(start, time.perf_counter()))
-        self._emit(sched, outs)
+        try:
+            self._emit(sched, outs)
+        except Exception as exc:  # a consumer bug must not stop the engine loop
+            log.exception("emit.failed", step_id=sched.step_id, exc=repr(exc))
         return outs
 
     def run_forever(self) -> None:
@@ -131,6 +134,8 @@ class Engine:
             t1 = time.perf_counter()
             tokens = self._sampler.sample(logits, seqs)
             t2 = time.perf_counter()
+            if len(tokens) != len(seqs):  # check before update mutates any seq
+                raise RuntimeError(f"sampler returned {len(tokens)} tokens for {len(seqs)} seqs")
             with self._lock:
                 outs = self._scheduler.update(sched, tokens)
         except Exception as exc:
@@ -155,7 +160,7 @@ class Engine:
         by_id = {item.seq.seq_id: item.seq for item in sched.seqs}
         for out in outs:
             seq = by_id[out.seq_id]
-            if out.token_id >= 0 and seq.first_token_ts is None:
+            if out.finish_reason != "error" and seq.first_token_ts is None:
                 seq.first_token_ts = now
             if out.finished:
                 self._log_finished(seq, out, now)

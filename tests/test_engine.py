@@ -3,6 +3,11 @@
 import threading
 
 import pytest
+import torch
+from spark_engine.engine import Engine
+from spark_engine.kv_cache import PagedKVCache
+from spark_engine.sampler import TorchSampler
+from spark_engine.scheduler import FCFSScheduler
 from spark_engine.types import SamplingParams, Sequence, TokenOutput
 
 from tests.fakes import FakeRunner, make_engine
@@ -109,6 +114,55 @@ def test_run_forever_and_stop_thread() -> None:
         engine.stop()
         thread.join(2.0)
     assert not thread.is_alive()
+
+
+def test_on_output_error_does_not_end_run_forever() -> None:
+    engine, _ = make_engine()
+    done = threading.Event()
+    calls = 0
+
+    def flaky(batch: list[TokenOutput]) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("consumer bug")
+        if any(o.finished and o.seq_id == "b" for o in batch):
+            done.set()
+
+    engine.on_output = flaky
+    thread = threading.Thread(target=engine.run_forever, daemon=True)
+    thread.start()
+    try:
+        engine.add_request(make_seq("a", [1, 2]))
+        engine.add_request(make_seq("b", [4]))
+        assert done.wait(2.0)
+        assert thread.is_alive()
+    finally:
+        engine.stop()
+        thread.join(2.0)
+    assert not thread.is_alive()
+
+
+class ShortSampler(TorchSampler):
+    """Returns one token too few."""
+
+    def sample(self, logits: torch.Tensor, seqs: list[Sequence]) -> list[int]:
+        return super().sample(logits, seqs)[:-1]
+
+
+def test_token_count_mismatch_fails_every_scheduled_seq() -> None:
+    kv = PagedKVCache(1, 1, 1, 16, 0, "cpu", num_blocks=64)
+    engine = Engine(FCFSScheduler(kv, 8, (7,)), FakeRunner(), ShortSampler())
+    a, b = make_seq("a", [1, 2]), make_seq("b", [4])
+    engine.add_request(a)
+    engine.add_request(b)
+    outs = engine.step()
+    assert outs == [
+        TokenOutput("req-a", "a", -1, True, "error"),
+        TokenOutput("req-b", "b", -1, True, "error"),
+    ]
+    assert (a.output_ids, b.output_ids) == ([], [])
+    assert kv.num_free_blocks == kv.num_blocks
 
 
 def test_impossible_request_raises_on_add() -> None:
