@@ -11,7 +11,6 @@ RULES: list[tuple[str, int | None, int | None]] = [
     ("spark_engine/**/*.py", 300, 800),
     ("tests/**/*.py", 500, None),
     ("docs/*.md", None, 200),
-    ("plan/decisions/*.md", None, 200),
     ("docs/runbooks/*.md", None, 200),
     ("CLAUDE.md", None, 150),
     ("AGENTS.md", None, 150),

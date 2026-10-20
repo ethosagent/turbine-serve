@@ -15,7 +15,6 @@
     ],
     "deny": [
       "Read(./uv.lock)",
-      "Read(./plan/reference/**)",
       "Read(./logs/**)",
       "Read(./.logs/**)",
       "Read(./.venv/**)"

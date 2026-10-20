@@ -67,7 +67,7 @@ markers = [
 target-version = "py312"
 line-length = 100
 src = ["spark_engine", "tests"]
-extend-exclude = ["docs", "plan", "*.md"]
+extend-exclude = ["docs", "*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "C90", "PL", "RUF"]

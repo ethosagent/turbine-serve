@@ -1,6 +1,6 @@
 """PreToolUse hook on Read: block whole-file reads over 400 lines; ask for a ranged read.
 
-plan/ files and HANDOFF.md are the hand-off and may be read whole. Exit 2 blocks the call and
+HANDOFF.md is the hand-off and may be read whole. Exit 2 blocks the call and
 shows the stderr message to the agent.
 """
 
@@ -13,7 +13,7 @@ LIMIT = 400
 def main() -> int:
     inp = json.load(sys.stdin).get("tool_input", {})
     path = inp.get("file_path", "")
-    if not path or inp.get("limit") or "/plan/" in path or path.endswith("/HANDOFF.md"):
+    if not path or inp.get("limit") or path.endswith("/HANDOFF.md"):
         return 0
     try:
         with open(path, "rb") as f:

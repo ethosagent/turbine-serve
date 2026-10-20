@@ -18,7 +18,6 @@ set -euo pipefail; cd "$(dirname "${BASH_SOURCE[0]}")/.."
 ## Generated
 - branch: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo none) @ $(git rev-parse --short HEAD 2>/dev/null || echo no-commits)
 - last check: $(cat .logs/summary.txt 2>/dev/null || echo 'not run')
-- active plan: $(ls -1t plan/*.md 2>/dev/null | head -1 || echo none)
 - files touched (git status --short):
 HEAD
   git status --short 2>/dev/null | sed 's/^/    /'
