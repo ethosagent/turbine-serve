@@ -3,28 +3,15 @@
 import asyncio
 import itertools
 import threading
-from collections.abc import AsyncGenerator, Callable
-from typing import Protocol
+from collections.abc import AsyncGenerator
 
+from spark_engine.interfaces import EngineLike
 from spark_engine.log import get_logger
 from spark_engine.types import SamplingParams, Sequence, TokenOutput
 
 log = get_logger("engine_client")
 
 _JOIN_TIMEOUT_S = 5
-
-
-class EngineLike(Protocol):
-    """The slice of Engine the client uses; keeps this file off engine.py's block imports."""
-
-    on_output: Callable[[list[TokenOutput]], None] | None
-
-    def add_request(self, seq: Sequence) -> None: ...
-    def abort(self, seq_id: str) -> None: ...
-    @property
-    def num_waiting(self) -> int: ...
-    def run_forever(self) -> None: ...
-    def stop(self) -> None: ...
 
 
 class QueueFull(Exception):

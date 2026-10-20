@@ -1,6 +1,6 @@
 """Protocols for every swappable block (SPEC.md: Contracts). Imports only types."""
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import Any, Protocol, runtime_checkable
 
 from torch import Tensor
@@ -77,3 +77,17 @@ class ModelRunner(Protocol):
 @runtime_checkable
 class Sampler(Protocol):
     def sample(self, logits: Tensor, seqs: list[Sequence]) -> list[int]: ...
+
+
+@runtime_checkable
+class EngineLike(Protocol):
+    """The slice of Engine the client uses; keeps engine_client.py off engine.py's block imports."""
+
+    on_output: Callable[[list[TokenOutput]], None] | None
+
+    def add_request(self, seq: Sequence) -> None: ...
+    def abort(self, seq_id: str) -> None: ...
+    @property
+    def num_waiting(self) -> int: ...
+    def run_forever(self) -> None: ...
+    def stop(self) -> None: ...

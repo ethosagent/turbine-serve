@@ -12,8 +12,8 @@ import pytest
 from spark_engine.api.server import _Request, _stream, create_app
 from spark_engine.config import EngineConfig
 from spark_engine.engine import build_engine
-from spark_engine.engine_client import EngineClient, EngineLike
-from spark_engine.interfaces import Detokenizer, Tokenizer
+from spark_engine.engine_client import EngineClient
+from spark_engine.interfaces import Detokenizer, EngineLike, Tokenizer
 from spark_engine.log import configure_logging
 from spark_engine.tokenizer import PromptTooLong
 from spark_engine.types import SamplingParams

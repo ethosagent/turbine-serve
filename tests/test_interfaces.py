@@ -18,9 +18,11 @@ import pytest
 import torch
 from spark_engine.attention.sdpa import SDPAAttention
 from spark_engine.detokenizer import IncrementalDetokenizer
+from spark_engine.engine import Engine
 from spark_engine.interfaces import (
     AttentionBackend,
     Detokenizer,
+    EngineLike,
     KVCacheManager,
     Model,
     ModelRunner,
@@ -37,9 +39,10 @@ from spark_engine.tokenizer import HFTokenizer
 from spark_engine.types import AttentionMetadata
 from transformers import Qwen3Config
 
-from tests.fakes import FakeRunner
+from tests.fakes import FakeRunner, make_engine
 
 CONFORMANCE: list[tuple[type, type, Callable[[], object]]] = []
+CONFORMANCE.append((Engine, EngineLike, lambda: make_engine()[0]))
 CONFORMANCE.append(
     (PagedKVCache, KVCacheManager, lambda: PagedKVCache(1, 1, 1, 16, 0, "cpu", num_blocks=4))
 )
