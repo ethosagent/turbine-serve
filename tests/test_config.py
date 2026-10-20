@@ -1,12 +1,14 @@
 """EngineConfig defaults and the `turbine serve` argument parsing."""
 
+import argparse
 import json
 from pathlib import Path
 
 import pytest
 import torch
+from pydantic import BaseModel
 from spark_engine.config import EngineConfig
-from spark_engine.main import config_from_args
+from spark_engine.main import _add_field_flags, config_from_args
 
 
 def test_defaults_match_decisions() -> None:
@@ -64,3 +66,12 @@ def test_config_resolved_is_logged(tmp_path: Path) -> None:
     assert resolved[0]["model"] == "x"
     assert resolved[0]["device"] == "cpu"
     assert resolved[0]["port"] == 8000
+
+
+def test_unsupported_field_type_raises_at_build_time() -> None:
+    class Bad(BaseModel):
+        model: str = "x"
+        verbose: bool = False
+
+    with pytest.raises(TypeError, match="verbose"):
+        _add_field_flags(argparse.ArgumentParser(), Bad)
