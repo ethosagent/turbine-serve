@@ -188,7 +188,7 @@ class Engine:
     def run_forever(self) -> None
 ```
 
-Logs: engine.started · step.done (debug: num_seqs, num_tokens, *_ms) · seq.finished (ttft_ms, tpot_ms) · step.failed
+Logs: engine.started · step.done (debug: num_seqs, num_tokens, *_ms) · seq.completed (ttft_ms, tpot_ms) · step.failed
 
 Extend later: Overlap scheduling (SGLang) splits step() into launch and collect here.
 

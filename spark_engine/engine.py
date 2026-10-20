@@ -183,7 +183,7 @@ class Engine:
         completion = len(seq.output_ids)
         first = seq.first_token_ts
         log.info(
-            "seq.finished",
+            "seq.completed",
             request_id=seq.request_id,
             seq_id=seq.seq_id,
             finish_reason=out.finish_reason,

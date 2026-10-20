@@ -39,7 +39,7 @@ Rules that must never be missed:
 ```bash
 jq -c 'select(.level=="error")' logs/engine.jsonl | tail -5
 jq -r 'select(.event=="step.done") | [.step_id,.num_seqs,.num_tokens,.forward_ms] | @tsv' logs/engine.jsonl | tail -20
-jq -c 'select(.event=="seq.finished") | {seq_id,finish_reason,ttft_ms,tpot_ms}' logs/engine.jsonl
+jq -c 'select(.event=="seq.completed") | {seq_id,finish_reason,ttft_ms,tpot_ms}' logs/engine.jsonl
 ```
 
 ## Gotchas (append below, newest last, one line each with the date)

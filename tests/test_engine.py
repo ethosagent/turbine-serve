@@ -1,11 +1,14 @@
 """Engine: step loop over the FakeRunner, per-step failure isolation, thread lifecycle."""
 
+import json
 import threading
+from pathlib import Path
 
 import pytest
 import torch
 from spark_engine.engine import Engine
 from spark_engine.kv_cache import PagedKVCache
+from spark_engine.log import configure_logging
 from spark_engine.sampler import TorchSampler
 from spark_engine.scheduler import FCFSScheduler
 from spark_engine.types import SamplingParams, Sequence, TokenOutput
@@ -171,3 +174,19 @@ def test_impossible_request_raises_on_add() -> None:
     with pytest.raises(ValueError, match="KV capacity"):
         engine.add_request(big)
     assert engine.num_waiting == 0
+
+
+def test_finish_logs_seq_completed_once_with_latency(tmp_path: Path) -> None:
+    log_file = tmp_path / "engine.jsonl"
+    engine, _ = make_engine()
+    configure_logging("info", str(log_file))
+    try:
+        engine.generate([1, 2], GREEDY)
+    finally:
+        configure_logging("info", None)
+    lines = [json.loads(line) for line in log_file.read_text().splitlines()]
+    completed = [line for line in lines if line["event"] == "seq.completed"]
+    assert len(completed) == 1 and completed[0]["component"] == "engine"
+    assert completed[0]["ttft_ms"] is not None and completed[0]["tpot_ms"] is not None
+    finished = [line for line in lines if line["event"] == "seq.finished"]
+    assert [line["component"] for line in finished] == ["scheduler"]
