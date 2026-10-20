@@ -1,4 +1,4 @@
-"""bf16 agreement with transformers on Qwen3-4B: reported, never gated (ADR 0004).
+"""bf16 agreement with transformers on Qwen3-4B: reported, never gated (ARCHITECTURE.md §V).
 
 M2 is gated on fp32-on-cuda parity (tests/test_parity.py). bf16 is never bit-identical to HF:
 HF rounds RoPE (cos/sin cast to bf16, rotation multiplied in bf16) and SwiGLU (silu rounded to

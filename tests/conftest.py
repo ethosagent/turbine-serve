@@ -2,7 +2,7 @@
 
 `model_case` is parametrized over "tiny" (2-layer random Qwen3, cpu fp32, runs everywhere) and
 "real" (Qwen/Qwen3-4B, cuda fp32; needs TURBINE_REAL_MODEL=1 and a CUDA device, so it skips on
-the Mac). The real case is fp32 because M2 is gated on fp32-on-cuda parity (ADR 0004); bf16 is
+the Mac). The real case is fp32 because M2 is gated on fp32-on-cuda parity (ARCHITECTURE.md §V); bf16 is
 reported by tests/test_bf16_report.py. Engine fixtures are module-scoped; the real ones free GPU
 memory before they build.
 
@@ -83,7 +83,7 @@ def model_case(request: pytest.FixtureRequest) -> ModelCase:
         tiny_dir = request.getfixturevalue("tiny_model_dir")
         return ModelCase("tiny", str(tiny_dir), "cpu", "float32", 0.01, 16)
     real_dir = request.getfixturevalue("real_model_dir")
-    # fp32: the gated parity case (ADR 0004). ~16 GB weights + kv 4 GB; HF fp32 adds ~16 GB.
+    # fp32: the gated parity case (ARCHITECTURE.md §V). ~16 GB weights + kv 4 GB; HF fp32 adds ~16 GB.
     return ModelCase("real", real_dir, "cuda", "float32", 4, 64)
 
 

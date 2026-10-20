@@ -1,7 +1,7 @@
 """End to end over HTTP with the openai SDK against a running server (TURBINE_BASE_URL).
 
 On the Mac the server is `scripts/serve-tiny.sh` (random weights), so these tests assert
-shapes, not content; Plan B runs them against the real model on the Spark.
+shapes, not content; the Spark runs them against the real model.
 """
 
 import os

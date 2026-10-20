@@ -1,4 +1,4 @@
-"""Parity with transformers, the M2 gate (ADR 0004): tiny cpu fp32 and real Qwen3-4B cuda fp32.
+"""Parity with transformers, the M2 gate (ARCHITECTURE.md §V): tiny cpu fp32 and real Qwen3-4B cuda fp32.
 
 bf16 is not gated here; tests/test_bf16_report.py reports it.
 """
