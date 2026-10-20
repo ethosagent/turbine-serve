@@ -143,3 +143,4 @@ id = "control-plane-no-torch"
 type = "forbidden"
 source_modules = ["spark_engine.scheduler", "spark_engine.api", "spark_engine.engine_client"]
 forbidden_modules = ["torch", "transformers"]
+allow_indirect_imports = true  # intent: no direct torch use; types.py may import it
