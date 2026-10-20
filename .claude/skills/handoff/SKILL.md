@@ -16,9 +16,9 @@ description: >-
    - **Done:** plan tasks completed this session (task numbers), commits made.
    - **Remaining:** the next task number and its first step; anything half-finished and where.
    - **Open decisions:** questions waiting on the owner, with the options you see.
-4. Tick the completed checkboxes in the active `plan/*.md`.
+4. Tick the completed checkboxes in the plan you worked from, if any.
 5. If the Spark was used: state whether `qwen38-flash` has been started again.
 6. Tell the user: the hand-off path, one line on where to resume, and suggest `/clear`.
 
 `HANDOFF.md` is gitignored; it is for the next session, not for history. Durable facts go in the
-plan file or a skill.
+skill or the docs.

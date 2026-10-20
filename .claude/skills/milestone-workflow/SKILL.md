@@ -10,7 +10,7 @@ description: >-
 
 Rules that must never be missed:
 
-- **Work from a plan file.** `plan/*.md` names the task, its files, interfaces and tests. Read the
+- **Work from a plan.** A task plan names the task, its files, interfaces and tests. Read the
   task's section, not the whole plan. No plan section for the change? Write one first (10 lines
   is fine) so the next session can pick it up.
 - **Test first.** Write the test named in the plan, run it, watch it fail for the right reason,
@@ -37,13 +37,13 @@ Rules that must never be missed:
    verbatim; later tasks depend on those names.
 5. **Shape comments.** Every tensor-producing line gets `# [T, H, D]`-style shape notes.
 6. **Check.** `make check`. Fix every failing gate; `.logs/<gate>.log` has the detail. Data-plane
-   blocks are tested on CPU against the tiny checkpoint (`tiny_model_dir` fixture); only Plan B
-   runs on the Spark, and a Spark failure is reproduced on the Mac before it is fixed.
+   blocks are tested on CPU against the tiny checkpoint (`tiny_model_dir` fixture); only the
+   real-model verification runs on the Spark, and a Spark failure is reproduced on the Mac before it is fixed.
 7. **Docs in the same commit.** New config flag → `README.md` run section if user-facing. New
    event name → nothing (logs are self-describing) unless it changes the jq trail in
    `docs/orientation.md`. New gotcha → `engine-debug` skill.
 8. **Commit.** One concern, imperative subject (`feat: FCFS scheduler with KV admission`),
-   attribution line from the session. Tick the task's checkboxes in the plan file.
+   attribution line from the session. Tick the task's checkboxes in the plan.
 9. **Hand off** when the task is done or context is past ~200K: `/handoff`.
 
 ## When the plan and reality disagree
