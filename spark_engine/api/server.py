@@ -1,6 +1,7 @@
 """Block 1: pydantic schemas, routes, SSE streaming; maps engine errors to HTTP status codes."""
 
 import asyncio
+import json
 import secrets
 import time
 from collections.abc import AsyncGenerator, AsyncIterator
@@ -110,7 +111,9 @@ class _Request:
         body = ChatCompletionChunk(
             id=self.request_id, created=self.created, model=self.model, choices=[choice]
         )
-        return f"data: {body.model_dump_json(exclude_none=True)}\n\n"
+        data = body.model_dump(exclude_none=True)
+        data["choices"][0]["finish_reason"] = finish_reason  # OpenAI always sends the key
+        return f"data: {json.dumps(data, ensure_ascii=False, separators=(',', ':'))}\n\n"
 
     def token_event(self, out: TokenOutput) -> str | None:
         """One SSE event per non-empty text delta; the first one carries the assistant role."""
@@ -164,6 +167,7 @@ async def _stream(
         ctx.completed(200)
     except (asyncio.CancelledError, GeneratorExit):
         log.info("client.disconnected")
+        ctx.completed(499)
         raise
     finally:
         clear_request()

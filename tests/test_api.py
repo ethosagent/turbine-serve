@@ -9,13 +9,14 @@ from typing import Any
 
 import httpx
 import pytest
-from spark_engine.api.server import create_app
+from spark_engine.api.server import _Request, _stream, create_app
 from spark_engine.config import EngineConfig
 from spark_engine.engine import build_engine
 from spark_engine.engine_client import EngineClient, EngineLike
 from spark_engine.interfaces import Detokenizer, Tokenizer
 from spark_engine.log import configure_logging
 from spark_engine.tokenizer import PromptTooLong
+from spark_engine.types import SamplingParams
 
 from tests.fakes import make_engine
 
@@ -119,7 +120,9 @@ async def test_stream_sse_format(api: httpx.AsyncClient) -> None:
     assert deltas[0]["role"] == "assistant"
     assert [d.get("content") for d in deltas[:-1]] == ["<3>", "<4>", "<5>", "<6>"]
     assert deltas[-1] == {} and chunks[-1]["choices"][0]["finish_reason"] == "stop"
-    assert all(c["choices"][0].get("finish_reason") is None for c in chunks[:-1])
+    assert all("finish_reason" in c["choices"][0] for c in chunks)  # OpenAI always sends it
+    assert all(c["choices"][0]["finish_reason"] is None for c in chunks[:-1])
+    assert all(None not in d.values() for d in deltas)  # delta stays free of null fields
 
 
 async def test_max_tokens_length_finish(api: httpx.AsyncClient) -> None:
@@ -194,6 +197,29 @@ async def test_request_id_in_logs(api: httpx.AsyncClient, tmp_path: Path) -> Non
     assert completed["duration_ms"] >= 0
     submitted = next(line for line in lines if line["event"] == "seq.submitted")
     assert submitted["request_id"] == request_id
+
+
+async def test_stream_disconnect_logs_499(tmp_path: Path) -> None:
+    log_file = tmp_path / "api.jsonl"
+    client = EngineClient(make_engine()[0], 4)
+    client.start()
+    configure_logging("info", str(log_file))
+    try:
+        outs = client.generate([1, 2], SamplingParams(temperature=0), "req_gone")
+        first = await anext(outs)
+        ctx = _Request("req_gone", "fake-model", 2, FakeDetokenizer())
+        body = _stream(outs, first, ctx)
+        assert (await anext(body)).startswith("data: ")
+        await body.aclose()  # what Starlette does when the client goes away mid-stream
+    finally:
+        configure_logging("info", None)
+        await client.stop()
+    lines = [json.loads(line) for line in log_file.read_text().splitlines()]
+    api_events = {line["event"]: line for line in lines if line["component"] == "api"}
+    assert api_events["client.disconnected"]["request_id"] == "req_gone"
+    completed = api_events["request.completed"]
+    assert completed["request_id"] == "req_gone" and completed["status"] == 499
+    assert completed["duration_ms"] >= 0
 
 
 async def test_tiny_model_streams_text(tiny_model_dir: Path) -> None:
