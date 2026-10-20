@@ -41,5 +41,3 @@
 - **Function ≤ 50 statements (ruff PLR0915), file ≤ 300 lines soft / 800 hard, docs ≤ 200.**
 - **Commits:** one concern each, imperative subject (`feat: paged KV cache manager`), ending with
   the attribution line the session provides.
-- **Plans are tracked.** `plan/` is in git and also holds the ADRs (`plan/decisions/`) and the visual
-  references (`plan/reference/`); a plan file is the hand-off between sessions.

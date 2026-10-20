@@ -112,8 +112,23 @@ background thread (D1). They share a process and talk only through queues owned 
 
 ## V. Fixed decisions
 
-The MVP's scope decisions D1–D10 are ADR `plan/decisions/0001-mvp-scope.md`. They are not
-re-litigated in code review; changing one is an ADR, agreed with the owner first.
+The MVP's scope decisions. They are not re-litigated in code review; changing one is agreed
+with the owner first.
+
+| ID | Decision |
+|---|---|
+| D1 | One process: FastAPI on the asyncio loop, engine loop on one background thread, bridged only by `engine_client.py`. |
+| D2 | API: `POST /v1/chat/completions` (stream and non-stream), `GET /v1/models`, `GET /health`. |
+| D3 | Batched data path from day one (flat `[T]` tensors, paged KV); `max_num_seqs = 8`. |
+| D4 | Admission reserves KV for `prompt_len + max_tokens`, so no preemption. |
+| D5 | `max_model_len = 8192`; the whole prompt is prefilled in one step. |
+| D6 | Sampling: temperature, top_p, top_k, max_tokens, seed; EOS 151645 and 151643; defaults 0.7 / 0.8 / 20. |
+| D7 | Thinking off by default; `chat_template_kwargs.enable_thinking` turns it on; think text inline. |
+| D8 | Attention: torch SDPA per sequence over the paged cache, `enable_gqa=True`. |
+| D9 | Explicit KV budget `--kv-gb` (default 30), block size 16. |
+| D10 | NGC PyTorch container on the Spark; bind 127.0.0.1; no auth. |
+
+Parity gate: M2 is gated on fp32-on-cuda parity with `transformers`; bf16 is reported, not gated.
 
 ---
 
@@ -123,5 +138,5 @@ re-litigated in code review; changing one is an ADR, agreed with the owner first
 2. Every rule in §II is enforced by a tool (`check-deps`, `check-components`), not by memory.
 3. Logs are machine-readable JSON with stable event names; the CLI is non-interactive.
 4. Skills and docs ship in the same commit as the change; every gotcha lands in a skill.
-5. **Amending this document:** open a plan file stating the axiom or rule to change and why,
-   add or update the import-linter contract and an ADR in the same commit, then edit here.
+5. **Amending this document:** write down the axiom or rule to change and why,
+   add or update the import-linter contract in the same commit, then edit here.

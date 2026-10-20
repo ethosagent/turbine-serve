@@ -12,7 +12,6 @@ spark-engine/
   spark_engine/       the package (one block per file; see below); testing/ holds the tiny checkpoint writer
   tests/              pytest; fakes.py holds FakeRunner for GPU-free engine tests
   docs/               SPEC.md (block spec), this file, conventions, numbers, runbooks/
-  plan/               plan files, decisions/ (ADRs), reference/ (visual refs); the hand-off between sessions
   .claude/            settings.json (hooks, deny list) and skills/
   Dockerfile          NGC PyTorch base + uv-exported deps; `deps` stage = dev image
 ```
@@ -48,10 +47,10 @@ Follow one request end to end: `jq -c 'select(.request_id=="req_…")' logs/engi
 | M3 | kv_cache, scheduler, sampler, engine | `engine.generate_batch()` matches M2 for 1 and 4 sequences |
 | M4 | tokenizer, detokenizer, engine_client, server, main | the openai SDK streams a reply; `jq` shows the full trail |
 
-Plan A (`plan/2026-10-20-build-on-mac.md`) builds and tests every block on the Mac: the control
+Every block is built and tested on the Mac first: the control
 plane against `tests/fakes.py::FakeRunner`, the data plane against a tiny random-weight Qwen3
 checkpoint from `spark_engine/testing/tiny_model.py` (real tensor names, real tokenizer, HF
-reference model for fp32 parity on CPU). Plan B (`plan/2026-10-20-verify-on-spark.md`) runs the
+reference model for fp32 parity on CPU). The Spark then runs the
 same tests with the real 8 GB model in bf16 on the GB10, then end to end, image, benchmark.
 
 ## Two machines

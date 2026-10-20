@@ -9,9 +9,6 @@ vLLM, SGLang, TensorRT-LLM and TensorFold work. Correctness over speed; speed-up
   `models/qwen3.py` · `attention/sdpa.py` → `sampler.py` → `detokenizer.py`. Kernel:
   `types.py` (contracts), `interfaces.py` (Protocols), `config.py`, `log.py`.
 - `tests/` — pytest; `gpu`-marked tests skip without CUDA, `e2e` without `TURBINE_BASE_URL`.
-- `plan/` — tracked: Plan A `2026-10-20-build-on-mac.md` (everything, on the Mac), Plan B
-  `2026-10-20-verify-on-spark.md` (real model on the GB10), `decisions/` (ADRs), `reference/`
-  (visual references, never read). The hand-off between sessions.
 - `docs/` — `SPEC.md` (block spec; read the block you touch), orientation, conventions, numbers, runbooks.
 
 ## Golden path
@@ -38,14 +35,15 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 
 ## Non-negotiables
 
-1. **D1–D10 are fixed** (`plan/decisions/0001-mvp-scope.md`). Ask before changing any.
+1. **D1–D10 are fixed** (the MVP scope decisions summarised in `ARCHITECTURE.md` §V). Ask before
+   changing any.
 2. **Contracts only in `types.py`, seams only in `interfaces.py`.** New fields get defaults.
 3. **Flat `[T]` tensors; never pad to `[batch, len]`.** Paged KV from day one.
 4. **Log component == file name.** `get_logger("scheduler")` lives only in `scheduler.py`
    (gate: `check-components`). One JSON line per event; lifecycle at info, per-step at debug.
 5. **fp32-on-cuda parity is the gate.** M2 passes only when Qwen3-4B in fp32 on cuda matches
    `transformers` fp32: argmax at every position, greedy 64 tokens. bf16 is reported, not
-   gated (ADR 0004).
+   gated (HF rounds RoPE/SwiGLU to bf16 earlier, so bf16 is never bit-identical).
 6. **Twin docs.** `CLAUDE.md` == `AGENTS.md`, same commit (gate: `check-twins`).
 7. **Done ships docs.** Tests for the change, skills/docs updated, `make check` green, one commit.
    Workflow: `.claude/skills/milestone-workflow/SKILL.md`.
@@ -80,7 +78,7 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 - Never size KV as a fraction of free memory on the Spark (unified memory). Use `--kv-gb`.
 - Never `pip install torch` inside the NGC container; its build is the only one for sm_121.
 - Never run GPU tests while `qwen38-flash` holds the Spark's memory (`docker stop` it first).
-- Never read `plan/reference/*.html` (large visual references) or `uv.lock`; both are denied.
+- Never read `uv.lock`; it is denied.
 - Never import vLLM or SGLang code. Libraries are the ones in `pyproject.toml`.
 - Never edit ARCHITECTURE.md casually, or `CLAUDE.md` without `AGENTS.md`.
 - Never claim `make check` passes without re-running it.
@@ -92,7 +90,7 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 | Axioms, layer model, dependency law, module map | `ARCHITECTURE.md` |
 | Repo tour, how a request flows, milestones | `docs/orientation.md` |
 | Behavioural rules in full | `docs/conventions.md` |
-| D1–D10 and later ADRs | `plan/decisions/README.md` |
+| D1–D10 scope decisions | `ARCHITECTURE.md` §V |
 | Qwen3-4B numbers and the Spark's numbers | `docs/qwen3-and-spark.md` |
 | Running on the Spark, memory, containers | `docs/runbooks/spark-session.md` |
 | Building and shipping the image | `docs/runbooks/release.md` |
@@ -102,5 +100,5 @@ FORBIDDEN (named import-linter contracts in `pyproject.toml`):
 
 # Compact instructions
 
-Keep: the active `plan/*.md` path and current task number, files changed this session, the last
+Keep: the current task and its number, files changed this session, the last
 `make check` result, and any open decision waiting on the owner. Drop tool output and file dumps.
