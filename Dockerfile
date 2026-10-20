@@ -12,11 +12,11 @@ COPY pyproject.toml uv.lock ./
 # only applies to uv on plain Linux hosts such as CI.
 RUN uv export --frozen --group dev --no-emit-project --no-hashes -o /tmp/requirements.txt \
  && grep -viE '^(torch|nvidia-|triton)' /tmp/requirements.txt > /tmp/requirements.filtered.txt \
- && uv pip install --system --no-cache -r /tmp/requirements.filtered.txt
+ && uv pip install --system --break-system-packages --no-cache -r /tmp/requirements.filtered.txt
 
 FROM deps AS release
 COPY README.md ./
 COPY spark_engine ./spark_engine
-RUN uv pip install --system --no-cache --no-deps .
+RUN uv pip install --system --break-system-packages --no-cache --no-deps .
 EXPOSE 8000
 ENTRYPOINT ["turbine", "serve", "--host", "0.0.0.0"]
