@@ -366,7 +366,7 @@ python -m spark_engine.main --model Qwen/Qwen3-4B --kv-gb 30 \
     --max-num-seqs 8 --max-model-len 8192 --port 8000 --log-level info
 ```
 
-Logs: config.resolved (all values, once at startup)
+Logs: config.resolved (all values, once at startup) · server.started (host, port, model; main.py, just before uvicorn)
 
 Extend later: New features arrive as new config fields with defaults.
 

@@ -67,6 +67,7 @@ def serve(config: EngineConfig) -> None:
     engine, tokenizer = build_engine(config)
     client = EngineClient(engine, config.max_queue)
     app = create_app(client, tokenizer, config.model, config.max_model_len)
+    log.info("server.started", host=config.host, port=config.port, model=config.model)
     uvicorn.run(app, host=config.host, port=config.port, log_config=None)
 
 

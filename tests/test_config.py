@@ -3,10 +3,12 @@
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 import torch
 from pydantic import BaseModel
+from spark_engine import main
 from spark_engine.config import EngineConfig
 from spark_engine.main import _add_field_flags, config_from_args
 
@@ -66,6 +68,22 @@ def test_config_resolved_is_logged(tmp_path: Path) -> None:
     assert resolved[0]["model"] == "x"
     assert resolved[0]["device"] == "cpu"
     assert resolved[0]["port"] == 8000
+
+
+def test_serve_logs_listen_address(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    log_file = tmp_path / "engine.jsonl"
+    config = config_from_args(["serve", "x", "--port", "8123", "--log-file", str(log_file)])
+    calls: list[dict[str, Any]] = []
+    monkeypatch.setattr(main, "build_engine", lambda _cfg: (object(), object()))
+    monkeypatch.setattr(main, "EngineClient", lambda engine, max_queue: object())
+    monkeypatch.setattr(main, "create_app", lambda *args: object())
+    monkeypatch.setattr(main.uvicorn, "run", lambda app, **kw: calls.append(kw))
+    main.serve(config)
+    events = [json.loads(line) for line in log_file.read_text().splitlines()]
+    started = [e for e in events if e["event"] == "server.started"]
+    assert len(started) == 1 and started[0]["component"] == "main"
+    assert (started[0]["host"], started[0]["port"], started[0]["model"]) == ("127.0.0.1", 8123, "x")
+    assert calls == [{"host": "127.0.0.1", "port": 8123, "log_config": None}]
 
 
 def test_unsupported_field_type_raises_at_build_time() -> None:
