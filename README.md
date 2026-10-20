@@ -2,7 +2,7 @@
 
 A minimal LLM inference server for Qwen3-4B on NVIDIA DGX Spark, with an OpenAI-compatible API.
 
-[![image](https://img.shields.io/badge/ghcr.io-turbine--serve%3A0.1.0-blue)](https://github.com/ethosagent/turbine-serve/pkgs/container/turbine-serve)
+[![docker](https://img.shields.io/docker/v/miteshdocker123/turbine-serve?label=docker&sort=semver)](https://hub.docker.com/r/miteshdocker123/turbine-serve)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![hardware](https://img.shields.io/badge/hardware-DGX%20Spark%20(GB10)-76b900)
 ![api](https://img.shields.io/badge/API-OpenAI--compatible-black)
@@ -19,7 +19,7 @@ Docker (main way):
 ```bash
 docker run --gpus all --ipc=host -p 127.0.0.1:8000:8000 \
   -v ~/.cache/huggingface:/root/.cache/huggingface \
-  ghcr.io/ethosagent/turbine-serve:0.1.0 \
+  miteshdocker123/turbine-serve:0.1.0 \
   Qwen/Qwen3-4B --kv-gb 30
 ```
 

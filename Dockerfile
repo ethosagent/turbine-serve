@@ -3,7 +3,7 @@
 # image already provides. Stage `deps` is the dev image (source mounted at /w); `release` is shipped.
 #
 #   dev:     docker build --target deps -t turbine-serve-dev .
-#   release: docker build -t ghcr.io/ethosagent/turbine-serve:0.1.0 .
+#   release: docker build -t miteshdocker123/turbine-serve:0.1.0 .
 FROM nvcr.io/nvidia/pytorch:26.07-py3 AS deps
 COPY --from=ghcr.io/astral-sh/uv:0.7.11 /uv /bin/uv
 WORKDIR /app
