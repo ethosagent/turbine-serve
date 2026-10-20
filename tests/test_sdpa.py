@@ -1,9 +1,11 @@
+import json
 import math
 
 import pytest
 import torch
 from spark_engine.attention import ATTENTION_BACKENDS, get_attention_backend
 from spark_engine.attention.sdpa import SDPAAttention
+from spark_engine.log import configure_logging
 from spark_engine.types import SamplingParams, ScheduledSeq, SchedulerOutput, Sequence
 from torch import Tensor
 
@@ -132,3 +134,22 @@ def test_registry_resolves_sdpa() -> None:
 def test_registry_unknown_name_lists_known() -> None:
     with pytest.raises(ValueError, match="unknown attention backend 'nope'; known: \\['sdpa'\\]"):
         get_attention_backend("nope")
+
+
+def test_rejects_short_block_table() -> None:
+    k_cache, v_cache = make_caches()
+    seq = make_seq("a", 0, [0])  # 6 tokens need 2 blocks of 4, only 1 given
+    q = torch.randn(6, HQ, D)  # [T, Hq, D]
+    with pytest.raises(AssertionError, match="block table too short"):
+        run([(seq, 6)], q, k_cache, v_cache)
+
+
+def test_metadata_log_counts_prefill_and_decode(capsys: pytest.CaptureFixture[str]) -> None:
+    configure_logging("debug", None)
+    sched = SchedulerOutput(
+        0, [ScheduledSeq(make_seq("p", 0, [4]), 1), ScheduledSeq(make_seq("d", 6, [1, 2]), 1)]
+    )
+    SDPAAttention(HQ, HKV, D).build_metadata(sched, BS)
+    line = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+    assert line["event"] == "attention.metadata"
+    assert (line["num_prefill"], line["num_decode"]) == (1, 1)

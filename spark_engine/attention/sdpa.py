@@ -38,7 +38,14 @@ class SDPAAttention:
             ctx_len.append(item.seq.num_computed + item.num_new_tokens)
             block_tables.append(list(item.seq.block_table))
             offset += item.num_new_tokens
-        log.debug("attention.metadata", step_id=sched.step_id, num_seqs=len(q_len), tokens=offset)
+        num_prefill = sum(1 for item in sched.seqs if item.seq.num_computed == 0)
+        log.debug(
+            "attention.metadata",
+            step_id=sched.step_id,
+            num_prefill=num_prefill,
+            num_decode=len(q_len) - num_prefill,
+            tokens=offset,
+        )
         return SDPAMetadata(q_start, q_len, ctx_len, block_tables)
 
     def forward(
@@ -69,6 +76,9 @@ class SDPAAttention:
         block_size: int,
     ) -> Tensor:
         nblocks = -(-ctx // block_size)
+        assert len(table) >= nblocks, (
+            f"block table too short: need {nblocks} blocks for ctx_len={ctx}, got {len(table)}"
+        )
         blocks = torch.tensor(table[:nblocks], device=k_cache.device)  # [nblocks]
         k = k_cache[blocks].reshape(-1, self.num_kv_heads, self.head_dim)[:ctx]  # [ctx, Hkv, D]
         v = v_cache[blocks].reshape(-1, self.num_kv_heads, self.head_dim)[:ctx]  # [ctx, Hkv, D]
